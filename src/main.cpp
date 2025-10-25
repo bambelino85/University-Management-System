@@ -523,9 +523,9 @@ private:
     
 public:
     Appointment() {}
-    Appointment(string id, string studID, string advID, string dt, string tm, string purp)
+    Appointment(string id, string studID, string advID, string dt, string tm, string purp, string stat = "Scheduled")
         : appointmentID(id), studentID(studID), advisorID(advID), date(dt), 
-          time(tm), purpose(purp), status("Scheduled") {}
+          time(tm), purpose(purp), status(stat) {}
     
     string getAppointmentID() const { return appointmentID; }
     string getStudentID() const { return studentID; }
@@ -643,6 +643,35 @@ public:
         return false;
     }
     
+    void displayUserProfile(const string& userID) {
+        ifstream file(dataDir + "users.dat");
+        if(!file.is_open()) {
+            cout << "Unable to load profile information." << endl;
+            return;
+        }
+        
+        string line;
+        while(getline(file, line)) {
+            vector<string> fields = split(line, '|');
+            if(fields.size() >= 12 && fields[0] == userID) {
+                // Display Person base information
+                cout << "ID: " << fields[0] << endl;
+                cout << "Name: " << fields[1] << " " << fields[2] << endl;
+                cout << "Email: " << fields[3] << endl;
+                cout << "Phone: " << fields[4] << endl;
+                cout << "Address: " << fields[5] << ", " << fields[6] << ", " 
+                     << fields[7] << " " << fields[8] << endl;
+                cout << "Username: " << fields[9] << endl;
+                cout << "Role: " << fields[11] << endl;
+                
+                file.close();
+                return;
+            }
+        }
+        file.close();
+        cout << "User profile not found." << endl;
+    }
+    
     string serializePersonForAuth(const Person& person) {
         return person.getPersonID() + "|" + person.getFirstName() + "|" + 
                person.getLastName() + "|" + person.getEmail() + "|" + 
@@ -758,7 +787,7 @@ public:
         while(getline(file, line)) {
             vector<string> fields = split(line, '|');
             if(fields.size() >= 7 && fields[1] == studentID) {
-                Appointment a(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]);
+                Appointment a(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6]);
                 appointments.push_back(a);
             }
         }
@@ -1116,9 +1145,7 @@ void studentMenu(const string& userID, const string& username, DatabaseManager& 
             }
             case 12: {
                 displayHeader("MY PROFILE");
-                cout << "Student ID: " << userID << endl;
-                cout << "Username: " << username << endl;
-                cout << "Role: Student" << endl;
+                db.displayUserProfile(userID);
                 pauseScreen();
                 break;
             }
@@ -1341,9 +1368,7 @@ void facultyMenu(const string& userID, const string& username, DatabaseManager& 
             }
             case 11: {
                 displayHeader("MY PROFILE");
-                cout << "Faculty ID: " << userID << endl;
-                cout << "Username: " << username << endl;
-                cout << "Role: Faculty" << endl;
+                db.displayUserProfile(userID);
                 pauseScreen();
                 break;
             }
@@ -1522,9 +1547,7 @@ void staffMenu(const string& userID, const string& username, DatabaseManager& db
             }
             case 10: {
                 displayHeader("MY PROFILE");
-                cout << "Staff ID: " << userID << endl;
-                cout << "Username: " << username << endl;
-                cout << "Role: Staff" << endl;
+                db.displayUserProfile(userID);
                 pauseScreen();
                 break;
             }
@@ -1552,6 +1575,7 @@ void administratorMenu(const string& userID, const string& username, DatabaseMan
         cout << "8. View All Users" << endl;
         cout << "9. Create Sample Data" << endl;
         cout << "10. Update Personal Information" << endl;
+        cout << "11. View Profile" << endl;
         cout << "0. Logout" << endl;
         cout << "\nEnter your choice: ";
         
@@ -1679,6 +1703,12 @@ void administratorMenu(const string& userID, const string& username, DatabaseMan
                 
                 db.updateUserInfo(userID, email, phone);
                 cout << "\nPersonal information updated successfully!" << endl;
+                pauseScreen();
+                break;
+            }
+            case 11: {
+                displayHeader("MY PROFILE");
+                db.displayUserProfile(userID);
                 pauseScreen();
                 break;
             }
