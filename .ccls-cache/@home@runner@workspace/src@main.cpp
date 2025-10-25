@@ -704,7 +704,37 @@ public:
         if(role == "Student") {
             // Calculate and display GPA
             double gpa = calculateStudentGPA(userID);
-            if(gpa > 0.0) {
+            
+            // Count enrollments first
+            int enrollmentCount = 0;
+            ifstream enrollFile(dataDir + "enrollments.dat");
+            if(enrollFile.is_open()) {
+                string eLine;
+                while(getline(enrollFile, eLine)) {
+                    vector<string> eFields = split(eLine, '|');
+                    if(eFields.size() >= 2 && eFields[1] == userID) {
+                        enrollmentCount++;
+                    }
+                }
+                enrollFile.close();
+            }
+            
+            // Check if student has any grades
+            ifstream gradeFile(dataDir + "grades.dat");
+            bool hasGrades = false;
+            if(gradeFile.is_open()) {
+                string gLine;
+                while(getline(gradeFile, gLine)) {
+                    vector<string> gFields = split(gLine, '|');
+                    if(gFields.size() >= 2 && gFields[1] == userID) {
+                        hasGrades = true;
+                        break;
+                    }
+                }
+                gradeFile.close();
+            }
+            
+            if(hasGrades) {
                 cout << "GPA: " << fixed << setprecision(2) << gpa << endl;
                 
                 // Check honor roll status
@@ -717,20 +747,9 @@ public:
                 } else {
                     cout << "Academic Standing: Academic Probation" << endl;
                 }
-            }
-            
-            // Count enrollments
-            int enrollmentCount = 0;
-            ifstream enrollFile(dataDir + "enrollments.dat");
-            if(enrollFile.is_open()) {
-                string eLine;
-                while(getline(enrollFile, eLine)) {
-                    vector<string> eFields = split(eLine, '|');
-                    if(eFields.size() >= 2 && eFields[1] == userID) {
-                        enrollmentCount++;
-                    }
-                }
-                enrollFile.close();
+            } else {
+                cout << "GPA: No grades recorded yet" << endl;
+                cout << "Academic Standing: New Student" << endl;
             }
             cout << "Current Enrollments: " << enrollmentCount << " courses" << endl;
             
@@ -768,8 +787,8 @@ public:
             cout << "Advisees: " << adviseeCount << " students" << endl;
             
         } else if(role == "Staff") {
-            cout << "Department: Administrative Services" << endl;
-            cout << "Position: Support Staff" << endl;
+            // Staff role-specific data not stored in current database schema
+            cout << "\nNote: Extended staff information (department, position) not available in current database." << endl;
             
         } else if(role == "Administrator") {
             cout << "Admin Level: System Administrator" << endl;
