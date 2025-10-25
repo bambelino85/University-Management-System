@@ -1,5 +1,5 @@
 #include <iostream>
-<parameter name="content">#include <fstream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -41,6 +41,10 @@ public:
     string getLastName() const { return lastName; }
     string getEmail() const { return email; }
     string getPhoneNumber() const { return phoneNumber; }
+    string getStreetAddress() const { return streetAddress; }
+    string getCity() const { return city; }
+    string getState() const { return state; }
+    string getZipCode() const { return zipCode; }
     string getUsername() const { return username; }
     string getPassword() const { return password; }
     string getRole() const { return role; }
@@ -639,6 +643,15 @@ public:
         return false;
     }
     
+    string serializePersonForAuth(const Person& person) {
+        return person.getPersonID() + "|" + person.getFirstName() + "|" + 
+               person.getLastName() + "|" + person.getEmail() + "|" + 
+               person.getPhoneNumber() + "|" + person.getStreetAddress() + "|" + 
+               person.getCity() + "|" + person.getState() + "|" + 
+               person.getZipCode() + "|" + person.getUsername() + "|" + 
+               hashPassword(person.getPassword()) + "|" + person.getRole();
+    }
+    
     bool registerUser(const Person& person) {
         if(usernameExists(person.getUsername())) {
             return false;
@@ -647,12 +660,7 @@ public:
         ofstream file(dataDir + "users.dat", ios::app);
         if(!file.is_open()) return false;
         
-        string data = person.getPersonID() + "|" + person.getFirstName() + "|" + 
-                     person.getLastName() + "|" + person.getEmail() + "|" + 
-                     person.getPhoneNumber() + "|" + person.getUsername() + "|" + 
-                     hashPassword(person.getPassword()) + "|" + person.getRole();
-        
-        file << data << endl;
+        file << serializePersonForAuth(person) << endl;
         file.close();
         return true;
     }
