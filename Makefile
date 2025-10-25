@@ -1,7 +1,7 @@
 CXX = clang++
 CXXFLAGS = -std=c++11 -Wall -Wextra
 TARGET = university_system
-SRC = main.cpp
+SRC = src/main.cpp
 
 all: $(TARGET)
 
