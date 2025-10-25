@@ -644,6 +644,22 @@ public:
         return false;
     }
     
+    double convertTo4PointScale(double numericGrade) {
+        // Convert 0-100 numeric grade to 4.0 scale
+        if(numericGrade >= 93.0) return 4.0;      // A
+        if(numericGrade >= 90.0) return 3.7;      // A-
+        if(numericGrade >= 87.0) return 3.3;      // B+
+        if(numericGrade >= 83.0) return 3.0;      // B
+        if(numericGrade >= 80.0) return 2.7;      // B-
+        if(numericGrade >= 77.0) return 2.3;      // C+
+        if(numericGrade >= 73.0) return 2.0;      // C
+        if(numericGrade >= 70.0) return 1.7;      // C-
+        if(numericGrade >= 67.0) return 1.3;      // D+
+        if(numericGrade >= 63.0) return 1.0;      // D
+        if(numericGrade >= 60.0) return 0.7;      // D-
+        return 0.0;                               // F
+    }
+    
     double calculateStudentGPA(const string& studentID) {
         ifstream file(dataDir + "grades.dat");
         if(!file.is_open()) return 0.0;
@@ -655,7 +671,8 @@ public:
         while(getline(file, line)) {
             vector<string> fields = split(line, '|');
             if(fields.size() >= 6 && fields[1] == studentID) {
-                totalPoints += stod(fields[4]);
+                double numericGrade = stod(fields[4]);
+                totalPoints += convertTo4PointScale(numericGrade);
                 totalCourses++;
             }
         }
@@ -735,7 +752,7 @@ public:
             }
             
             if(hasGrades) {
-                cout << "GPA: " << fixed << setprecision(2) << gpa << endl;
+                cout << "GPA: " << fixed << setprecision(2) << gpa << " / 4.0" << endl;
                 
                 // Check honor roll status
                 if(gpa >= 3.75) {
@@ -1092,21 +1109,26 @@ void studentMenu(const string& userID, const string& username, DatabaseManager& 
             }
             case 4: {
                 displayHeader("GPA CALCULATION");
+                double gpa = db.calculateStudentGPA(userID);
                 vector<Grade> grades = db.loadGradesByStudent(userID);
                 
                 if(grades.empty()) {
                     cout << "No grades available for GPA calculation." << endl;
                 } else {
-                    double totalPoints = 0.0;
-                    int totalCourses = grades.size();
+                    cout << "Current GPA: " << fixed << setprecision(2) << gpa << " / 4.0" << endl;
+                    cout << "Total Courses: " << grades.size() << endl;
                     
-                    for(const Grade& g : grades) {
-                        totalPoints += g.getNumericGrade();
+                    // Show academic standing
+                    cout << "\nAcademic Standing: ";
+                    if(gpa >= 3.75) {
+                        cout << "Dean's List" << endl;
+                    } else if(gpa >= 3.5) {
+                        cout << "Honor Roll" << endl;
+                    } else if(gpa >= 2.0) {
+                        cout << "Good Standing" << endl;
+                    } else {
+                        cout << "Academic Probation" << endl;
                     }
-                    
-                    double gpa = totalPoints / totalCourses;
-                    cout << "Current GPA: " << fixed << setprecision(2) << gpa << endl;
-                    cout << "Total Courses: " << totalCourses << endl;
                 }
                 pauseScreen();
                 break;
