@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
@@ -643,6 +644,27 @@ public:
         return false;
     }
     
+    double calculateStudentGPA(const string& studentID) {
+        ifstream file(dataDir + "grades.dat");
+        if(!file.is_open()) return 0.0;
+        
+        double totalPoints = 0.0;
+        int totalCourses = 0;
+        
+        string line;
+        while(getline(file, line)) {
+            vector<string> fields = split(line, '|');
+            if(fields.size() >= 6 && fields[1] == studentID) {
+                totalPoints += stod(fields[4]);
+                totalCourses++;
+            }
+        }
+        file.close();
+        
+        if(totalCourses == 0) return 0.0;
+        return totalPoints / totalCourses;
+    }
+    
     void displayUserProfile(const string& userID) {
         ifstream file(dataDir + "users.dat");
         if(!file.is_open()) {
@@ -651,9 +673,12 @@ public:
         }
         
         string line;
+        string role;
         while(getline(file, line)) {
             vector<string> fields = split(line, '|');
             if(fields.size() >= 12 && fields[0] == userID) {
+                role = fields[11];
+                
                 // Display Person base information
                 cout << "ID: " << fields[0] << endl;
                 cout << "Name: " << fields[1] << " " << fields[2] << endl;
@@ -662,14 +687,94 @@ public:
                 cout << "Address: " << fields[5] << ", " << fields[6] << ", " 
                      << fields[7] << " " << fields[8] << endl;
                 cout << "Username: " << fields[9] << endl;
-                cout << "Role: " << fields[11] << endl;
+                cout << "Role: " << role << endl;
                 
                 file.close();
-                return;
+                break;
             }
         }
         file.close();
-        cout << "User profile not found." << endl;
+        
+        if(role.empty()) {
+            cout << "User profile not found." << endl;
+            return;
+        }
+        
+        // Display role-specific information
+        if(role == "Student") {
+            // Calculate and display GPA
+            double gpa = calculateStudentGPA(userID);
+            if(gpa > 0.0) {
+                cout << "GPA: " << fixed << setprecision(2) << gpa << endl;
+                
+                // Check honor roll status
+                if(gpa >= 3.75) {
+                    cout << "Academic Standing: Dean's List" << endl;
+                } else if(gpa >= 3.5) {
+                    cout << "Academic Standing: Honor Roll" << endl;
+                } else if(gpa >= 2.0) {
+                    cout << "Academic Standing: Good Standing" << endl;
+                } else {
+                    cout << "Academic Standing: Academic Probation" << endl;
+                }
+            }
+            
+            // Count enrollments
+            int enrollmentCount = 0;
+            ifstream enrollFile(dataDir + "enrollments.dat");
+            if(enrollFile.is_open()) {
+                string eLine;
+                while(getline(enrollFile, eLine)) {
+                    vector<string> eFields = split(eLine, '|');
+                    if(eFields.size() >= 2 && eFields[1] == userID) {
+                        enrollmentCount++;
+                    }
+                }
+                enrollFile.close();
+            }
+            cout << "Current Enrollments: " << enrollmentCount << " courses" << endl;
+            
+        } else if(role == "Faculty") {
+            // Count courses taught
+            int coursesTeaching = 0;
+            ifstream courseFile(dataDir + "courses.dat");
+            if(courseFile.is_open()) {
+                string cLine;
+                while(getline(courseFile, cLine)) {
+                    vector<string> cFields = split(cLine, '|');
+                    if(cFields.size() >= 6 && cFields[5] == userID) {
+                        coursesTeaching++;
+                    }
+                }
+                courseFile.close();
+            }
+            cout << "Courses Teaching: " << coursesTeaching << endl;
+            
+            // Count advisees
+            int adviseeCount = 0;
+            ifstream apptFile(dataDir + "appointments.dat");
+            if(apptFile.is_open()) {
+                set<string> uniqueStudents;
+                string aLine;
+                while(getline(apptFile, aLine)) {
+                    vector<string> aFields = split(aLine, '|');
+                    if(aFields.size() >= 3 && aFields[2] == userID) {
+                        uniqueStudents.insert(aFields[1]);
+                    }
+                }
+                apptFile.close();
+                adviseeCount = uniqueStudents.size();
+            }
+            cout << "Advisees: " << adviseeCount << " students" << endl;
+            
+        } else if(role == "Staff") {
+            cout << "Department: Administrative Services" << endl;
+            cout << "Position: Support Staff" << endl;
+            
+        } else if(role == "Administrator") {
+            cout << "Admin Level: System Administrator" << endl;
+            cout << "Privileges: Full System Access" << endl;
+        }
     }
     
     string serializePersonForAuth(const Person& person) {
