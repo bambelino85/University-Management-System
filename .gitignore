@@ -1,0 +1,52 @@
+# C++ compiled files
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+university_system
+
+# Database files (optional - remove if you want to track them)
+data/*.dat
+data/*.txt
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build directories
+build/
+bin/
+obj/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# OS files
+.DS_Store
+Thumbs.db
