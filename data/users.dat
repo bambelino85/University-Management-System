@@ -1,0 +1,165 @@
+Adm1001|Mason|Jackson|mason.jackson@ums.edu|7132735041|740 3rd St.|San Diego|CA|71646|admin1001|249815512900893685|Admin
+Adm1002|Alexander|Jones|alexander.jones@ums.edu|7133235624|329 Oak St.|Rochester|NY|43710|admin1002|7571197449996070|Admin
+Adm1003|Penelope|Allen|penelope.allen@ums.edu|7137030509|510 Oak St.|Philadelphia|PA|44388|admin1003|8245521609236074242|Admin
+Adm1004|Henry|Robinson|henry.robinson@ums.edu|7131235883|847 Oak St.|Boulder|CO|60197|admin1004|8244045428866536874|Admin
+Adm1005|Mason|Harris|mason.harris@ums.edu|7135429223|759 Cypress Way|Phoenix|AZ|32634|admin1005|8246335577605906364|Admin
+Fac1001|Chloe|Jackson|chloe.jackson@ums.edu|7137701194|674 Cypress Way|Charlotte|NC|99974|fac1001|7570127445289600|Faculty
+Fac1002|Mia|Wilson|mia.wilson@ums.edu|7131800375|453 Oak St.|Rochester|NY|48390|fac1002|249815649537513194|Faculty
+Fac1003|Luke|Harris|luke.harris@ums.edu|7135214601|725 Park Ave.|Portland|OR|29073|fac1003|249912058522281225|Faculty
+Fac1004|Luke|Clark|luke.clark@ums.edu|7131833770|825 Park Ave.|Jacksonville|FL|71108|fac1004|7570347019315168|Faculty
+Fac1005|Sebastian|Clark|sebastian.clark@ums.edu|7133328241|585 Hillcrest Ave.|Rochester|NY|11175|fac1005|249856529229801073|Faculty
+Fac1006|Mason|Hernandez|mason.hernandez@ums.edu|7135461811|993 Main St.|Buffalo|NY|73463|fac1006|249898757883717709|Faculty
+Fac1007|Penelope|Garcia|penelope.garcia@ums.edu|7139205068|148 Elm St.|Phoenix|AZ|23298|fac1007|249842526542350698|Faculty
+Fac1008|Olivia|Sanchez|olivia.sanchez@ums.edu|7136623660|118 Highland Rd.|Tacoma|WA|19787|fac1008|249842125021544766|Faculty
+Fac1009|Avery|Anderson|avery.anderson@ums.edu|7137435664|890 2nd St.|San Diego|CA|27412|fac1009|8243984228412536856|Faculty
+Fac1010|Ella|Johnson|ella.johnson@ums.edu|7132387980|264 3rd St.|Philadelphia|PA|14059|fac1010|8246549706016369526|Faculty
+Fac1011|Evelyn|King|evelyn.king@ums.edu|7136133503|433 Cedar Ln.|Phoenix|AZ|43459|fac1011|249840119150287569|Faculty
+Fac1012|Zoe|Lewis|zoe.lewis@ums.edu|7131448628|817 Highland Rd.|Chicago|IL|68947|fac1012|8246823838694970053|Faculty
+Fac1013|Avery|Anderson|avery.anderson@ums.edu|7139318549|204 Main St.|Dallas|TX|86956|fac1013|249899955263840562|Faculty
+Fac1014|Mason|Garcia|mason.garcia@ums.edu|7138870914|436 Pine Ave.|San Francisco|CA|51302|fac1014|8246634221278272615|Faculty
+Fac1015|Victoria|Taylor|victoria.taylor@ums.edu|7135934593|932 Pine Ave.|Dallas|TX|19490|fac1015|249850892675538337|Faculty
+Fac1016|Scarlett|Anderson|scarlett.anderson@ums.edu|7135477204|110 Cypress Way|Phoenix|AZ|12561|fac1016|249819915585998557|Faculty
+Fac1017|Lucas|Williams|lucas.williams@ums.edu|7133222896|371 Oak St.|Buffalo|NY|18205|fac1017|249821151070599702|Faculty
+Fac1018|Emily|King|emily.king@ums.edu|7131781870|268 Cypress Way|Pittsburgh|PA|66971|fac1018|8246976553897189728|Faculty
+Fac1019|Evelyn|Nguyen|evelyn.nguyen@ums.edu|7133063352|587 Oak St.|Austin|TX|23371|fac1019|8243823105316050800|Faculty
+Fac1020|Benjamin|Miller|benjamin.miller@ums.edu|7138091527|499 Cypress Way|Springfield|IL|50720|fac1020|8245581609199604769|Faculty
+Stf1001|Mason|Martinez|mason.martinez@ums.edu|7138169091|541 Maple Dr.|Miami|FL|41711|staff1001|249895649074013303|Staff
+Stf1002|Avery|Robinson|avery.robinson@ums.edu|7131667356|367 Sunset Blvd.|Charlotte|NC|28553|staff1002|7572138102652796|Staff
+Stf1003|Ella|Miller|ella.miller@ums.edu|7131392098|438 River Rd.|Seattle|WA|77832|staff1003|249816338047967726|Staff
+Stf1004|Avery|Perez|avery.perez@ums.edu|7138574045|513 Highland Rd.|San Antonio|TX|76655|staff1004|7570945208544942|Staff
+Stf1005|Lily|Martinez|lily.martinez@ums.edu|7135315287|502 3rd St.|Tampa|FL|65405|staff1005|7572177404631367|Staff
+Stf1006|Amelia|Johnson|amelia.johnson@ums.edu|7135135818|574 Cypress Way|Rochester|NY|65303|staff1006|8245256614154930968|Staff
+Stf1007|Lily|Torres|lily.torres@ums.edu|7137982414|489 3rd St.|Philadelphia|PA|65587|staff1007|249838787748194583|Staff
+Stf1008|Scarlett|Green|scarlett.green@ums.edu|7135184755|292 Highland Rd.|Jacksonville|FL|60234|staff1008|8245012026872523087|Staff
+Stf1009|Benjamin|Torres|benjamin.torres@ums.edu|7135794010|862 Elm St.|Colorado Springs|CO|58359|staff1009|8244127044838830360|Staff
+Stf1010|Ethan|Green|ethan.green@ums.edu|7138726778|300 Park Ave.|San Francisco|CA|46645|staff1010|7571011523866681|Staff
+Stf1011|Jayden|Williams|jayden.williams@ums.edu|7139742822|758 Maple Dr.|Nashville|TN|76653|staff1011|7570159925902215|Staff
+Stf1012|Ella|Clark|ella.clark@ums.edu|7134489753|270 Hillcrest Ave.|Denver|CO|89551|staff1012|7572545106606695|Staff
+Stf1013|Benjamin|Walker|benjamin.walker@ums.edu|7134733577|252 2nd St.|New York|NY|36533|staff1013|249818043095286293|Staff
+Stf1014|Avery|Harris|avery.harris@ums.edu|7132414073|378 Park Ave.|Naperville|IL|47656|staff1014|7571054494997502|Staff
+Stf1015|Alexander|Scott|alexander.scott@ums.edu|7136109934|189 Oak St.|Los Angeles|CA|31160|staff1015|249864832938132834|Staff
+Stf1016|Elijah|Jackson|elijah.jackson@ums.edu|7134453734|440 Elm St.|Denver|CO|47989|staff1016|7572771442139093|Staff
+Stf1017|Daniel|Perez|daniel.perez@ums.edu|7133177013|749 Cypress Way|Houston|TX|31052|staff1017|249881541680044680|Staff
+Stf1018|Olivia|Miller|olivia.miller@ums.edu|7139249422|879 Cypress Way|Naperville|IL|52831|staff1018|8243853414999288553|Staff
+Stf1019|Abigail|Anderson|abigail.anderson@ums.edu|7131902335|125 Main St.|Phoenix|AZ|53830|staff1019|249869252799648834|Staff
+Stf1020|Isabella|White|isabella.white@ums.edu|7131711915|691 Maple Dr.|Miami|FL|93017|staff1020|7572150030532085|Staff
+Stf1021|Daniel|Flores|daniel.flores@ums.edu|7137766853|706 Pine Ave.|Orlando|FL|80600|staff1021|8244100564369009049|Staff
+Stf1022|Daniel|Young|daniel.young@ums.edu|7131744258|317 Lakeside Dr.|Charlotte|NC|63556|staff1022|249892288707827360|Staff
+Stf1023|Isabella|Wilson|isabella.wilson@ums.edu|7136083279|808 Lakeside Dr.|Colorado Springs|CO|24735|staff1023|8245572933076971473|Staff
+Stf1024|Sebastian|Lewis|sebastian.lewis@ums.edu|7131960379|691 Cypress Way|San Antonio|TX|59646|staff1024|7572238924324129|Staff
+Stf1025|Jayden|Harris|jayden.harris@ums.edu|7136360525|849 3rd St.|Memphis|TN|71019|staff1025|249900164413358991|Staff
+Stf1026|Grace|Lewis|grace.lewis@ums.edu|7139163549|307 Elm St.|Buffalo|NY|85421|staff1026|249912606685798492|Staff
+Stf1027|Lily|Allen|lily.allen@ums.edu|7137774138|466 3rd St.|Nashville|TN|28990|staff1027|7573026621799574|Staff
+Stf1028|Olivia|Walker|olivia.walker@ums.edu|7137397567|549 3rd St.|Cambridge|MA|67462|staff1028|8244912338458803382|Staff
+Stf1029|Isabella|Ramirez|isabella.ramirez@ums.edu|7137992235|777 Maple Dr.|Naperville|IL|89017|staff1029|8245481903069780669|Staff
+Stf1030|Alexander|Jones|alexander.jones@ums.edu|7133203349|434 Elm St.|Los Angeles|CA|56277|staff1030|249848774926570063|Staff
+Stf1031|Harper|Anderson|harper.anderson@ums.edu|7137032147|142 Cedar Ln.|San Francisco|CA|94913|staff1031|7571360324723714|Staff
+Stf1032|Noah|Davis|noah.davis@ums.edu|7134829634|772 Highland Rd.|Salem|OR|71299|staff1032|249853799921539147|Staff
+Stf1033|Lily|Moore|lily.moore@ums.edu|7131551534|746 Park Ave.|Nashville|TN|35607|staff1033|8244785097672448379|Staff
+Stf1034|Mason|Garcia|mason.garcia@ums.edu|7131665893|603 Lakeside Dr.|Seattle|WA|19797|staff1034|8245397436453322881|Staff
+Stf1035|James|Nguyen|james.nguyen@ums.edu|7139775982|438 3rd St.|Boston|MA|10370|staff1035|8243729896282177578|Staff
+Stu1001|Mia|Hill|mia.hill@ums.edu|7133166975|405 3rd St.|Portland|OR|47571|stu1001|8244591862096024987|Student
+Stu1002|Abigail|Martinez|abigail.martinez@ums.edu|7135038297|780 Hillcrest Ave.|Los Angeles|CA|68632|stu1002|7572622784282348|Student
+Stu1003|Olivia|Gonzalez|olivia.gonzalez@ums.edu|7138974166|293 Highland Rd.|Dallas|TX|55826|stu1003|249898338760955167|Student
+Stu1004|Emily|Torres|emily.torres@ums.edu|7134948706|489 Elm St.|San Francisco|CA|45552|stu1004|8243802907382440311|Student
+Stu1005|Carter|Taylor|carter.taylor@ums.edu|7136553407|373 Park Ave.|Denver|CO|91689|stu1005|7572589344424884|Student
+Stu1006|Lily|White|lily.white@ums.edu|7133061099|819 3rd St.|Fort Worth|TX|93940|stu1006|249817057687744312|Student
+Stu1007|Sebastian|Taylor|sebastian.taylor@ums.edu|7132123676|818 Pine Ave.|Raleigh|NC|53460|stu1007|8244692657807660457|Student
+Stu1008|Penelope|Ramirez|penelope.ramirez@ums.edu|7136735637|612 Cypress Way|Colorado Springs|CO|14977|stu1008|249889328626517858|Student
+Stu1009|Chloe|White|chloe.white@ums.edu|7134367197|882 Sunset Blvd.|Tucson|AZ|75832|stu1009|7570464553112946|Student
+Stu1010|Olivia|Nguyen|olivia.nguyen@ums.edu|7139630871|455 Highland Rd.|Jacksonville|FL|65958|stu1010|7572990677614547|Student
+Stu1011|Wyatt|Wilson|wyatt.wilson@ums.edu|7131929521|477 Oak St.|Tacoma|WA|34480|stu1011|8244167973420848932|Student
+Stu1012|Ethan|Anderson|ethan.anderson@ums.edu|7134004484|465 Highland Rd.|Rochester|NY|79931|stu1012|8246970575727993037|Student
+Stu1013|Benjamin|Johnson|benjamin.johnson@ums.edu|7139364533|257 Main St.|Orlando|FL|31914|stu1013|7572240232341757|Student
+Stu1014|Henry|Flores|henry.flores@ums.edu|7139441457|562 River Rd.|Orlando|FL|37264|stu1014|249904440186678807|Student
+Stu1015|Olivia|Thomas|olivia.thomas@ums.edu|7136325363|878 Oak St.|Atlanta|GA|80148|stu1015|249848053703837434|Student
+Stu1016|Alexander|Sanchez|alexander.sanchez@ums.edu|7134933861|107 Highland Rd.|New York|NY|77935|stu1016|8245570078966294743|Student
+Stu1017|Michael|White|michael.white@ums.edu|7134616662|177 3rd St.|Dallas|TX|20612|stu1017|7573057811059561|Student
+Stu1018|Abigail|Allen|abigail.allen@ums.edu|7135568186|435 Cypress Way|Pittsburgh|PA|55004|stu1018|7570242274642528|Student
+Stu1019|Sebastian|Rodriguez|sebastian.rodriguez@ums.edu|7133494231|222 Hillcrest Ave.|Raleigh|NC|69445|stu1019|8245496209958227158|Student
+Stu1020|Mia|Hill|mia.hill@ums.edu|7137638582|112 Hillcrest Ave.|Charlotte|NC|69760|stu1020|7571267656407663|Student
+Stu1021|Ethan|Miller|ethan.miller@ums.edu|7136489198|455 Cypress Way|Nashville|TN|52351|stu1021|249898464041513284|Student
+Stu1022|Abigail|Sanchez|abigail.sanchez@ums.edu|7134373144|752 River Rd.|Raleigh|NC|40508|stu1022|8246674366484835077|Student
+Stu1023|Jackson|Perez|jackson.perez@ums.edu|7133509251|648 Cedar Ln.|Boston|MA|72282|stu1023|249906383249316223|Student
+Stu1024|James|Thomas|james.thomas@ums.edu|7133257204|331 River Rd.|Boston|MA|25333|stu1024|249899617179592496|Student
+Stu1025|Avery|Martinez|avery.martinez@ums.edu|7131748659|926 Highland Rd.|Philadelphia|PA|87732|stu1025|7570885818590642|Student
+Stu1026|Wyatt|White|wyatt.white@ums.edu|7137937571|435 Cypress Way|Atlanta|GA|14216|stu1026|249911160384220739|Student
+Stu1027|Olivia|Hernandez|olivia.hernandez@ums.edu|7136023156|963 Pine Ave.|San Antonio|TX|13030|stu1027|8243831714491724257|Student
+Stu1028|Zoe|King|zoe.king@ums.edu|7137552741|133 Sunset Blvd.|Tacoma|WA|27796|stu1028|8244638183946797200|Student
+Stu1029|Lily|Scott|lily.scott@ums.edu|7135386482|568 Oak St.|Spokane|WA|85175|stu1029|249815620891023036|Student
+Stu1030|Penelope|Moore|penelope.moore@ums.edu|7131771971|341 Maple Dr.|Chicago|IL|55877|stu1030|7572796942581553|Student
+Stu1031|Scarlett|Thomas|scarlett.thomas@ums.edu|7134168148|590 Main St.|Spokane|WA|85089|stu1031|7572333959657281|Student
+Stu1032|Jayden|Walker|jayden.walker@ums.edu|7137429238|160 Main St.|Tampa|FL|90146|stu1032|8247213128564606236|Student
+Stu1033|Ava|Miller|ava.miller@ums.edu|7131291844|353 Pine Ave.|Denver|CO|52610|stu1033|8246419836221940817|Student
+Stu1034|Avery|Rodriguez|avery.rodriguez@ums.edu|7139934287|356 Park Ave.|Colorado Springs|CO|62952|stu1034|7571151542079590|Student
+Stu1035|Noah|Jones|noah.jones@ums.edu|7134501933|783 Cedar Ln.|Pittsburgh|PA|30366|stu1035|7571578668626864|Student
+Stu1036|Victoria|Nguyen|victoria.nguyen@ums.edu|7135628434|894 Lakeside Dr.|San Jose|CA|52757|stu1036|8245356515297053288|Student
+Stu1037|Emily|Davis|emily.davis@ums.edu|7134877876|636 Pine Ave.|San Diego|CA|64061|stu1037|8245302227168171037|Student
+Stu1038|Ava|Jones|ava.jones@ums.edu|7136641038|608 Highland Rd.|San Francisco|CA|92775|stu1038|8246531420844881346|Student
+Stu1039|Michael|Young|michael.young@ums.edu|7131754420|901 Main St.|Denver|CO|48602|stu1039|7572774996848136|Student
+Stu1040|Sebastian|Rodriguez|sebastian.rodriguez@ums.edu|7135634194|356 Pine Ave.|Pittsburgh|PA|82800|stu1040|249906754961200008|Student
+Stu1041|Mia|Taylor|mia.taylor@ums.edu|7139431007|519 Sunset Blvd.|Boston|MA|93754|stu1041|8246507332598275819|Student
+Stu1042|Sophia|Jackson|sophia.jackson@ums.edu|7133889303|707 3rd St.|Rochester|NY|91588|stu1042|7572793185610373|Student
+Stu1043|Noah|Martin|noah.martin@ums.edu|7139150997|212 Highland Rd.|Nashville|TN|37744|stu1043|8246956080903621198|Student
+Stu1044|Mia|Lewis|mia.lewis@ums.edu|7136079514|591 Hillcrest Ave.|Springfield|IL|65193|stu1044|7572209512137459|Student
+Stu1045|Abigail|Harris|abigail.harris@ums.edu|7134405842|768 Cypress Way|Spokane|WA|98602|stu1045|7570731827787698|Student
+Stu1046|Daniel|Garcia|daniel.garcia@ums.edu|7139845782|390 Lakeside Dr.|Tacoma|WA|28093|stu1046|249820439842950637|Student
+Stu1047|Sebastian|Hernandez|sebastian.hernandez@ums.edu|7139155889|943 2nd St.|Phoenix|AZ|92104|stu1047|8245311070884505817|Student
+Stu1048|Daniel|Taylor|daniel.taylor@ums.edu|7139810637|243 Cypress Way|Boulder|CO|40432|stu1048|249892630496082668|Student
+Stu1049|Lily|Garcia|lily.garcia@ums.edu|7131239799|639 Main St.|Nashville|TN|38515|stu1049|7570216760133114|Student
+Stu1050|Avery|Wilson|avery.wilson@ums.edu|7131840673|714 3rd St.|Springfield|IL|78218|stu1050|249866979908617788|Student
+Stu1051|Penelope|Ramirez|penelope.ramirez@ums.edu|7136404333|978 Maple Dr.|Charlotte|NC|47181|stu1051|249816930479974194|Student
+Stu1052|Elijah|Taylor|elijah.taylor@ums.edu|7134176579|608 River Rd.|Spokane|WA|53460|stu1052|8244865586254128286|Student
+Stu1053|Evelyn|Clark|evelyn.clark@ums.edu|7134069953|672 Sunset Blvd.|Colorado Springs|CO|45961|stu1053|8245539355764675203|Student
+Stu1054|Jackson|Lopez|jackson.lopez@ums.edu|7131261389|989 Cypress Way|Boston|MA|95260|stu1054|7570814751646031|Student
+Stu1055|Chloe|Clark|chloe.clark@ums.edu|7131578737|860 Cypress Way|Boulder|CO|28362|stu1055|249852743116385300|Student
+Stu1056|Penelope|Lee|penelope.lee@ums.edu|7138687606|860 Pine Ave.|San Antonio|TX|33870|stu1056|249824179991609594|Student
+Stu1057|Olivia|Gonzalez|olivia.gonzalez@ums.edu|7139685447|621 Cedar Ln.|Savannah|GA|96617|stu1057|249907975642046767|Student
+Stu1058|Benjamin|Allen|benjamin.allen@ums.edu|7132599187|722 Maple Dr.|New York|NY|31095|stu1058|7572771980208655|Student
+Stu1059|Amelia|Thomas|amelia.thomas@ums.edu|7139370929|104 Maple Dr.|Buffalo|NY|37405|stu1059|7570192303956811|Student
+Stu1060|Michael|Perez|michael.perez@ums.edu|7134487793|947 Hillcrest Ave.|Atlanta|GA|85526|stu1060|7571108419383109|Student
+Stu1061|Victoria|Nguyen|victoria.nguyen@ums.edu|7138778968|414 Maple Dr.|Boulder|CO|84868|stu1061|8244696535334526025|Student
+Stu1062|Daniel|Lopez|daniel.lopez@ums.edu|7137778650|767 Cedar Ln.|San Antonio|TX|85375|stu1062|8244754924014143592|Student
+Stu1063|Scarlett|Young|scarlett.young@ums.edu|7136728154|719 River Rd.|Rochester|NY|50372|stu1063|8245265096427406327|Student
+Stu1064|Liam|Anderson|liam.anderson@ums.edu|7131346017|281 Cedar Ln.|Los Angeles|CA|90678|stu1064|249907762977011071|Student
+Stu1065|Ella|Hernandez|ella.hernandez@ums.edu|7132615206|763 Elm St.|Charlotte|NC|54706|stu1065|249838056585501303|Student
+Stu1066|Sebastian|Flores|sebastian.flores@ums.edu|7131424231|641 Hillcrest Ave.|Orlando|FL|78713|stu1066|7572928880521327|Student
+Stu1067|Ella|Rodriguez|ella.rodriguez@ums.edu|7135032261|601 Sunset Blvd.|Denver|CO|54558|stu1067|7570729453574903|Student
+Stu1068|Harper|Moore|harper.moore@ums.edu|7132713006|583 Cypress Way|Cambridge|MA|87768|stu1068|8244104584518545002|Student
+Stu1069|Daniel|Flores|daniel.flores@ums.edu|7135362230|210 Main St.|Denver|CO|54162|stu1069|249818636583260764|Student
+Stu1070|Elijah|Martinez|elijah.martinez@ums.edu|7137234350|164 2nd St.|Naperville|IL|34461|stu1070|7572801847290010|Student
+Stu1071|Benjamin|Harris|benjamin.harris@ums.edu|7139945885|466 Highland Rd.|Atlanta|GA|62526|stu1071|7572173252023749|Student
+Stu1072|Emily|Green|emily.green@ums.edu|7138295958|614 Highland Rd.|Denver|CO|99014|stu1072|7570809011441362|Student
+Stu1073|Ella|Thomas|ella.thomas@ums.edu|7131211690|248 Main St.|Boulder|CO|30349|stu1073|249905756424165782|Student
+Stu1074|Zoe|Hill|zoe.hill@ums.edu|7133548132|716 Oak St.|Chicago|IL|54431|stu1074|7570260705424319|Student
+Stu1075|Ethan|Jones|ethan.jones@ums.edu|7134254602|376 Oak St.|Tacoma|WA|53054|stu1075|7571022601683102|Student
+Stu1076|Jacob|Rodriguez|jacob.rodriguez@ums.edu|7137647255|987 Main St.|Charlotte|NC|10329|stu1076|249867229908843907|Student
+Stu1077|Alexander|Robinson|alexander.robinson@ums.edu|7136380849|709 Cedar Ln.|Springfield|IL|24083|stu1077|7572812320971002|Student
+Stu1078|Wyatt|Williams|wyatt.williams@ums.edu|7132787927|153 Cedar Ln.|Naperville|IL|88855|stu1078|7570124989560584|Student
+Stu1079|Amelia|Davis|amelia.davis@ums.edu|7138464480|325 River Rd.|Phoenix|AZ|73039|stu1079|8245716600144061409|Student
+Stu1080|Penelope|Lewis|penelope.lewis@ums.edu|7133895286|591 Maple Dr.|Austin|TX|82774|stu1080|249905064733068163|Student
+Stu1081|Mason|Wright|mason.wright@ums.edu|7135105230|100 Sunset Blvd.|Los Angeles|CA|60505|stu1081|8244002607683408798|Student
+Stu1082|James|Williams|james.williams@ums.edu|7138525970|409 Cypress Way|Boston|MA|52997|stu1082|8244743929578431672|Student
+Stu1083|Benjamin|Jackson|benjamin.jackson@ums.edu|7134150147|459 Park Ave.|Austin|TX|66214|stu1083|249864800185504993|Student
+Stu1084|Penelope|Williams|penelope.williams@ums.edu|7131989537|836 Cedar Ln.|Austin|TX|30641|stu1084|249852221483150525|Student
+Stu1085|Zoe|Ramirez|zoe.ramirez@ums.edu|7131689731|685 Oak St.|Jacksonville|FL|81304|stu1085|249907178454772333|Student
+Stu1086|Elijah|Taylor|elijah.taylor@ums.edu|7137694051|713 3rd St.|Fort Worth|TX|95571|stu1086|249816704859103441|Student
+Stu1087|Jacob|Robinson|jacob.robinson@ums.edu|7132550813|606 Pine Ave.|New York|NY|76540|stu1087|7572682805070851|Student
+Stu1088|Penelope|Johnson|penelope.johnson@ums.edu|7136147508|221 Highland Rd.|Nashville|TN|43846|stu1088|7573075568009374|Student
+Stu1089|Michael|Scott|michael.scott@ums.edu|7132340489|972 Main St.|Colorado Springs|CO|28976|stu1089|249902794895779123|Student
+Stu1090|Jackson|Lewis|jackson.lewis@ums.edu|7137486886|346 Maple Dr.|Tampa|FL|26071|stu1090|249894649399798515|Student
+Stu1091|Luke|Thomas|luke.thomas@ums.edu|7135374292|757 Maple Dr.|Memphis|TN|53450|stu1091|8244073653367627404|Student
+Stu1092|Jayden|Rodriguez|jayden.rodriguez@ums.edu|7136710150|722 Main St.|San Diego|CA|39477|stu1092|7572521438246198|Student
+Stu1093|Jacob|Perez|jacob.perez@ums.edu|7136022123|864 3rd St.|Boston|MA|96571|stu1093|8246257715026294732|Student
+Stu1094|Olivia|Clark|olivia.clark@ums.edu|7131232290|268 Cypress Way|Buffalo|NY|10497|stu1094|7573030978910938|Student
+Stu1095|Jackson|Jones|jackson.jones@ums.edu|7138034135|395 Cypress Way|Salem|OR|67610|stu1095|249886108472793539|Student
+Stu1096|Penelope|Walker|penelope.walker@ums.edu|7135378779|514 Hillcrest Ave.|Miami|FL|74056|stu1096|8244145966006130188|Student
+Stu1097|Olivia|Thompson|olivia.thompson@ums.edu|7138829863|787 Pine Ave.|Charlotte|NC|84568|stu1097|7570958054140558|Student
+Stu1098|Zoe|Ramirez|zoe.ramirez@ums.edu|7132213425|794 3rd St.|San Diego|CA|89371|stu1098|249823947122951255|Student
+Stu1099|Alexander|Green|alexander.green@ums.edu|7138286955|773 Main St.|San Diego|CA|24498|stu1099|8243964812310214055|Student
+Stu1100|Matthew|Lopez|matthew.lopez@ums.edu|7132126757|228 Sunset Blvd.|Memphis|TN|92688|stu1100|7572796606669637|Student
+Stu1101|Mia|Lopez|mia.lopez@ums.edu|7131670974|161 Elm St.|Austin|TX|81059|stu1101|249903013235942431|Student
+Stu1102|Emily|Lopez|emily.lopez@ums.edu|7134854584|594 Pine Ave.|Springfield|IL|66494|stu1102|7571243363227077|Student
+Stu1103|Ava|Jackson|ava.jackson@ums.edu|7132326879|193 River Rd.|San Antonio|TX|29034|stu1103|249900723458811727|Student
+Stu1104|Luke|White|luke.white@ums.edu|7133580842|265 Highland Rd.|Boulder|CO|32912|stu1104|7572514168652882|Student
+Stu1105|Emily|Sanchez|emily.sanchez@ums.edu|7139771968|240 Park Ave.|Houston|TX|35579|stu1105|8247005244414859944|Student

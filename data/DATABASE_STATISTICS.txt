@@ -1,0 +1,74 @@
+UNIVERSITY MANAGEMENT SYSTEM - DATABASE STATISTICS
+===================================================
+
+Generated: October 25, 2025
+
+DATABASE FILES
+--------------
+✓ users.dat         - 165 records (5 admins, 20 faculty, 35 staff, 105 students)
+✓ courses.dat       - 197 records (15 departments)
+✓ enrollments.dat   - 405 records (3-5 courses per student)
+
+COURSE DISTRIBUTION BY DEPARTMENT (197 Total)
+----------------------------------------------
+Computer Science (CS)    - 15 courses
+Mathematics (MATH)       - 14 courses
+Physics (PHYS)           - 14 courses
+Chemistry (CHEM)         - 13 courses
+Biology (BIO)            - 14 courses
+English (ENG)            - 13 courses
+History (HIST)           - 14 courses
+Psychology (PSY)         - 14 courses
+Economics (ECON)         - 13 courses
+Business (BUS)           - 14 courses
+Engineering (ENGR)       - 14 courses
+Art (ART)                - 13 courses
+Music (MUS)              - 13 courses
+Political Science (POLI) - 14 courses
+Sociology (SOC)          - 5 courses
+
+ENROLLMENT STATISTICS
+---------------------
+Total Students:               105
+Total Enrollments:            405
+Average courses per student:  3.86
+Average enrollment per course: 2.06
+
+Course Credits: 2-4 credits each
+Class Capacity: 25-50 students per course
+Semesters: Fall 2024, Spring 2025
+Instructors: 20 faculty members (Fac1001-Fac1020)
+
+SCHEDULES
+---------
+Time slots include:
+- MWF: 8:00-16:00 (morning & afternoon)
+- TTh: 8:00-17:30 (extended hours)
+- Evening: MW/TTh 18:00-19:30
+
+ENROLLMENT DATES
+----------------
+All enrollments dated between:
+August 15-29, 2024 (first 2 weeks of semester)
+
+SAMPLE COURSES
+--------------
+CS1001  - Introduction to Programming (3 credits, MWF)
+MATH1006 - Calculus I (4 credits, TTh)
+PHYS1016 - Physics I: Mechanics (4 credits, MWF)
+BIO1033 - Introduction to Biology (4 credits, TTh)
+ENG1055 - English Composition I (3 credits, MWF)
+
+TESTING THE DATA
+----------------
+1. Login as student: stu1001 / BG4V66Oucp
+2. Select "View My Courses" to see enrolled courses
+3. Login as faculty to view assigned courses
+4. Login as admin to view all system data
+
+All data is realistic with:
+- Valid course codes (DEPT + number)
+- Appropriate credit hours
+- Diverse schedules
+- Proper instructor assignments
+- Enrollment within capacity limits

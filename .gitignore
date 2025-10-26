@@ -59,3 +59,10 @@ __pycache__/
 .Python
 venv/
 ENV/
+
+# --- allow app data files in repo ---
+!data/**
+!*.dat
+!*.txt
+!*.json
+!*.csv
