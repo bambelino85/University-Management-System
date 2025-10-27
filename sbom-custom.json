@@ -1,0 +1,43 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-27T18:00:00Z",
+    "tools": [
+      { "vendor": "Anchore", "name": "Syft", "version": "1.33.0" },
+      { "vendor": "CycloneDX", "name": "CLI", "version": "latest" }
+    ],
+    "component": {
+      "type": "application",
+      "name": "University-Management-System",
+      "version": "1.0.0",
+      "bom-ref": "app:ums"
+    },
+    "supplier": { "name": "YourNameOrTeam" }
+  },
+  "components": [
+    {
+      "type": "file",
+      "name": "ums.exe",
+      "version": "1.0.0",
+      "bom-ref": "file:ums.exe",
+      "licenses": [{ "license": { "id": "Proprietary" } }],
+      "properties": [
+        { "name": "file.path", "value": ".\\build\\bin\\ums.exe" },
+        { "name": "language", "value": "C++" }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libgrading.dll",
+      "version": "1.0.0",
+      "bom-ref": "lib:grading",
+      "licenses": [{ "license": { "id": "Proprietary" } }],
+      "properties": [
+        { "name": "file.path", "value": ".\\build\\bin\\libgrading.dll" },
+        { "name": "language", "value": "C++" }
+      ]
+    }
+  ]
+}
