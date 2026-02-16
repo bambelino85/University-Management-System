@@ -76,3 +76,8 @@ university_app
 
 # SBOM outputs (optional)
 sbom-*.json
+
+PushMe1!
+PushMe1!.pub
+*.key
+*.pem
