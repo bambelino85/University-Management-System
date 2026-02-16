@@ -66,3 +66,13 @@ ENV/
 !*.txt
 !*.json
 !*.csv
+
+# Compiled binary
+university_app
+
+# Build artifacts
+*.o
+*.out
+
+# SBOM outputs (optional)
+sbom-*.json
