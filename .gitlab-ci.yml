@@ -75,17 +75,23 @@ sbom:scan:
 
 report:publish:
   stage: report
-  needs: [sbom:scan]
+  needs:
+    - job: build:cpp
+      artifacts: true
+    - job: sbom:sign
+      artifacts: true
+    - job: sbom:scan
+      artifacts: true
   script:
-    - echo "[Report] Pipeline complete"
-    - ls -lh sbom/ reports/
+    - echo "[Report] Pipeline complete. Artifacts:"
+    - ls -lh university_app || echo "university_app not found"
+    - ls -lh sbom/ || echo "sbom/ not found"
+    - ls -lh reports/ || echo "reports/ not found"
   artifacts:
     name: "sbom-attestation-v${APP_VERSION}-${CI_COMMIT_SHORT_SHA}"
     paths:
       - university_app
-      - sbom/holistic-sbom-signed.xml
-      - sbom/holistic-sbom.json
-      - reports/vuln-analysis-report.html
-      - reports/vuln-report.json
+      - sbom/
+      - reports/
     expire_in: 3 months
     when: always
