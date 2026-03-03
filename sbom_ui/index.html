@@ -1,640 +1,1915 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SBOM Attestation Dashboard</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    :root {
-      --navy: #1F4E79; --blue: #2E75B6; --light: #EBF3FB;
-      --green: #28a745; --red: #dc3545; --orange: #fd7e14;
-      --yellow: #ffc107; --gray: #6c757d; --white: #fff;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; }
-    header {
-      background: var(--navy); color: white; padding: 16px 32px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    header h1 { font-size: 1.4rem; letter-spacing: 0.5px; }
-    header span { font-size: 0.85rem; opacity: 0.7; }
-    .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
-    .card {
-      background: white; border-radius: 8px; padding: 24px;
-      margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    .card h2 { color: var(--navy); font-size: 1.1rem; margin-bottom: 16px;
-      padding-bottom: 8px; border-bottom: 2px solid var(--light); }
-    input, select {
-      width: 100%; padding: 9px 12px; border: 1px solid #ccc;
-      border-radius: 4px; font-size: 0.95rem; margin-bottom: 10px;
-    }
-    input:focus, select:focus { outline: none; border-color: var(--blue); }
-    .btn {
-      padding: 9px 20px; border: none; border-radius: 4px;
-      cursor: pointer; font-size: 0.95rem; font-weight: bold;
-      transition: opacity 0.2s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: var(--navy); color: white; }
-    .btn-success { background: var(--green); color: white; }
-    .btn-danger  { background: var(--red); color: white; }
-    .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
-    .row { display: flex; gap: 16px; flex-wrap: wrap; }
-    .stat-box {
-      flex: 1; min-width: 140px; background: var(--light);
-      border-radius: 6px; padding: 16px; text-align: center;
-    }
-    .stat-box .num { font-size: 2rem; font-weight: bold; color: var(--navy); }
-    .stat-box .lbl { font-size: 0.8rem; color: var(--gray); margin-top: 4px; }
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 12px;
-      font-size: 0.78rem; font-weight: bold; text-transform: uppercase;
-    }
-    .badge-success { background: #d4edda; color: #155724; }
-    .badge-danger  { background: #f8d7da; color: #721c24; }
-    .badge-warning { background: #fff3cd; color: #856404; }
-    .badge-info    { background: #d1ecf1; color: #0c5460; }
-    .badge-running { background: #cce5ff; color: #004085; }
-    .badge-gray    { background: #e2e3e5; color: #383d41; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    th { background: var(--navy); color: white; padding: 8px 12px; text-align: left; }
-    td { padding: 7px 12px; border-bottom: 1px solid #eee; }
-    tr:hover td { background: var(--light); }
-    .sev-Critical { background:#ff4d4d; color:white; }
-    .sev-High     { background:#ff9900; color:white; }
-    .sev-Medium   { background:#ffd700; color:#333; }
-    .sev-Low      { background:#90ee90; color:#333; }
-    .sev-Negligible { background:#ddd; color:#333; }
-    .log-box {
-      background: #1e1e1e; color: #d4d4d4; font-family: monospace;
-      font-size: 0.78rem; padding: 12px; border-radius: 4px;
-      max-height: 260px; overflow-y: auto; white-space: pre-wrap;
-    }
-    .alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; font-size: 0.9rem; }
-    .alert-danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .alert-info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-    .pipeline-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .pipeline-row:last-child { border-bottom: none; }
-    .stage-flow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-    .stage-pill {
-      padding: 2px 10px; border-radius: 10px; font-size: 0.75rem;
-      background: var(--light); color: var(--navy); border: 1px solid #ccc;
-    }
-    .spinner { display: inline-block; width: 16px; height: 16px;
-      border: 2px solid #ccc; border-top-color: var(--navy);
-      border-radius: 50%; animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .tabs { display: flex; gap: 2px; margin-bottom: 20px; }
-    .tab {
-      padding: 8px 20px; border: none; cursor: pointer; font-size: 0.95rem;
-      background: #e9ecef; border-radius: 4px 4px 0 0; color: #555;
-    }
-    .tab.active { background: var(--navy); color: white; }
-    .progress-bar { background: #e9ecef; border-radius: 4px; height: 8px; overflow: hidden; margin-top: 4px; }
-    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-    a { color: var(--blue); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .label { font-size: 0.82rem; font-weight: bold; color: var(--gray); margin-bottom: 4px; }
-    footer { text-align: center; color: var(--gray); font-size: 0.8rem; padding: 24px; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SBOM ATTESTATION — CLASSIFIED OPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Syne+Mono&family=Syne:wght@400;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   ROOT VARIABLES — CLASSIFIED OPS TERMINAL
+══════════════════════════════════════════════ */
+:root{
+  --bg:#080b0d;
+  --bg2:#0c1015;
+  --bg3:#111820;
+  --bg4:#162030;
+  --acid:#aaff00;
+  --acid2:#88dd00;
+  --acid3:rgba(170,255,0,.12);
+  --acid4:rgba(170,255,0,.05);
+  --amber:#ffaa00;
+  --amber2:rgba(255,170,0,.15);
+  --red:#ff3344;
+  --red2:rgba(255,51,68,.12);
+  --teal:#00ffcc;
+  --teal2:rgba(0,255,204,.1);
+  --text:#d4f0d4;
+  --text2:#6a9a6a;
+  --text3:#2d4a2d;
+  --border:rgba(170,255,0,.15);
+  --border2:rgba(170,255,0,.07);
+  --glow:0 0 20px rgba(170,255,0,.25);
+  --glow-lg:0 0 40px rgba(170,255,0,.15),0 0 80px rgba(170,255,0,.05);
+  --fn:'Syne Mono',monospace;
+  --fd:'Syne',sans-serif;
+  --fc:'Courier Prime',monospace;
+  --vt:'VT323',monospace;
+  --r:4px;--r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body,#root{height:100%;overflow:hidden;}
+body{font-family:var(--fn);background:var(--bg);color:var(--text);font-size:13px;cursor:default;}
+/* scanline overlay */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  animation:scanroll 8s linear infinite;
+}
+@keyframes scanroll{from{background-position:0 0;}to{background-position:0 100px;}}
+
+#root{display:flex;flex-direction:column;position:relative;z-index:1;}
+
+/* Canvas BG */
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;}
+
+/* ── BOOT SCREEN ── */
+.boot-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:#000;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+}
+.boot-ascii{
+  font-family:var(--vt);font-size:clamp(14px,1.8vw,22px);
+  color:var(--acid);line-height:1.2;text-align:center;
+  text-shadow:0 0 10px rgba(170,255,0,.5);
+  white-space:pre;
+}
+.boot-log{
+  margin-top:24px;width:500px;max-width:90vw;
+  font-family:var(--fn);font-size:11px;color:var(--text2);
+  min-height:160px;
+}
+.boot-log-line{opacity:0;animation:bAppear .1s forwards;}
+@keyframes bAppear{to{opacity:1;}}
+.boot-progress{
+  margin-top:20px;width:500px;max-width:90vw;height:3px;
+  background:rgba(170,255,0,.15);border-radius:2px;overflow:hidden;
+}
+.boot-progress-fill{
+  height:100%;background:var(--acid);border-radius:2px;
+  box-shadow:0 0 8px var(--acid);
+  transition:width .15s ease;
+}
+
+/* ── HEADER ── */
+.hdr{
+  height:52px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:space-between;padding:0 20px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  position:relative;z-index:10;
+}
+.hdr::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--acid),transparent);
+  opacity:.4;
+}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-sigil{
+  width:30px;height:30px;background:var(--acid);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--vt);font-size:18px;color:#000;font-weight:bold;
+  box-shadow:var(--glow);animation:sigilPulse 4s ease-in-out infinite;
+}
+@keyframes sigilPulse{0%,100%{box-shadow:var(--glow);}50%{box-shadow:0 0 30px rgba(170,255,0,.5);}}
+.hdr-title{font-family:var(--vt);font-size:20px;color:var(--acid);letter-spacing:3px;}
+.hdr-sub{font-size:9px;color:var(--text2);letter-spacing:2px;margin-top:-2px;font-family:var(--fn);}
+.hdr-right{display:flex;align-items:center;gap:16px;}
+.hdr-clock{font-family:var(--vt);font-size:18px;color:var(--acid);opacity:.7;letter-spacing:2px;}
+.hdr-conn{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--fn);}
+.conn-led{width:6px;height:6px;border-radius:50%;}
+.conn-led.on{background:var(--acid);box-shadow:0 0 6px var(--acid);animation:ledBlink 2s ease-in-out infinite;}
+.conn-led.off{background:var(--red);box-shadow:0 0 6px var(--red);}
+@keyframes ledBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden;position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sbar{
+  width:56px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;
+  transition:width .25s cubic-bezier(.4,0,.2,1);overflow:hidden;position:relative;z-index:2;
+}
+.sbar.expanded{width:200px;align-items:stretch;padding:12px 0;}
+.sbar-toggle{
+  width:32px;height:32px;border:1px solid var(--border2);border-radius:var(--r);
+  background:none;cursor:pointer;color:var(--text2);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;margin-bottom:8px;flex-shrink:0;
+  align-self:center;
+}
+.sbar-toggle:hover{border-color:var(--acid);color:var(--acid);}
+.nav-i{
+  width:40px;height:40px;border:1px solid transparent;border-radius:var(--r);
+  background:none;cursor:pointer;color:var(--text2);font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s;position:relative;
+}
+.nav-i:hover,.nav-i.active{border-color:var(--border);color:var(--acid);background:var(--acid4);}
+.nav-i.active{border-color:var(--acid);box-shadow:var(--glow);}
+.nav-row{
+  display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;
+  color:var(--text2);font-size:12px;border-left:2px solid transparent;
+  transition:all .2s;white-space:nowrap;
+}
+.nav-row:hover{color:var(--acid);background:var(--acid4);border-left-color:rgba(170,255,0,.3);}
+.nav-row.active{color:var(--acid);background:var(--acid3);border-left-color:var(--acid);}
+.nav-row .nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;}
+.sbar-label{font-size:8px;letter-spacing:2px;color:var(--text3);padding:12px 16px 4px;white-space:nowrap;}
+.kbd-hint{font-size:8px;color:var(--text3);font-family:var(--fn);margin-left:auto;
+  background:var(--bg3);padding:1px 5px;border-radius:3px;border:1px solid var(--border2);}
+.sbar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border2);}
+.sbar-footer-mini{margin-top:auto;padding:12px 0;border-top:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text3);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;position:relative;}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.page{padding:20px;display:flex;flex-direction:column;gap:16px;min-height:100%;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,var(--acid) 30%,var(--acid) 70%,transparent 100%);
+  opacity:.2;
+}
+.card-hd{
+  padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border2);
+}
+.card-t{
+  font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:3px;
+  text-transform:uppercase;color:var(--acid);display:flex;align-items:center;gap:8px;
+}
+.card-t-icon{font-size:14px;}
+.card-body{padding:16px;}
+
+/* ── STAT GRID ── */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.sc{
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:14px;position:relative;overflow:hidden;cursor:default;
+  transition:all .25s;
+}
+.sc:hover{border-color:var(--border);transform:translateY(-2px);}
+.sc::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--sc-color,var(--acid));opacity:.5;
+  transition:opacity .2s;
+}
+.sc:hover::after{opacity:1;}
+.sc-val{
+  font-family:var(--vt);font-size:32px;color:var(--sc-color,var(--acid));
+  line-height:1;animation:numIn .8s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes numIn{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:scale(1);}}
+.sc-lbl{font-size:9px;color:var(--text2);letter-spacing:2px;margin-top:4px;text-transform:uppercase;}
+.sc-icon{position:absolute;top:10px;right:10px;font-size:16px;opacity:.15;}
+.sc-delta{font-family:var(--fn);font-size:9px;margin-top:3px;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border:1px solid var(--border);border-radius:var(--r);cursor:pointer;
+  font-family:var(--fn);font-size:11px;letter-spacing:.5px;
+  background:transparent;color:var(--text2);transition:all .2s;
+  white-space:nowrap;
+}
+.btn:hover{border-color:var(--acid);color:var(--acid);background:var(--acid4);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-acid{border-color:var(--acid);color:var(--acid);background:var(--acid3);}
+.btn-acid:hover{background:rgba(170,255,0,.2);box-shadow:var(--glow);}
+.btn-amber{border-color:var(--amber);color:var(--amber);background:var(--amber2);}
+.btn-amber:hover{background:rgba(255,170,0,.25);}
+.btn-red{border-color:var(--red);color:var(--red);background:var(--red2);}
+.btn-teal{border-color:var(--teal);color:var(--teal);background:var(--teal2);}
+.btn-sm{padding:4px 9px;font-size:10px;}
+.btn-xs{padding:2px 7px;font-size:9px;}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;padding:2px 8px;
+  border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;
+  font-family:var(--fn);text-transform:uppercase;
+}
+.b-ok{background:rgba(170,255,0,.1);color:var(--acid);border:1px solid rgba(170,255,0,.25);}
+.b-fail{background:rgba(255,51,68,.1);color:var(--red);border:1px solid rgba(255,51,68,.25);}
+.b-run{background:rgba(0,255,204,.1);color:var(--teal);border:1px solid rgba(0,255,204,.25);}
+.b-pend{background:rgba(255,170,0,.1);color:var(--amber);border:1px solid rgba(255,170,0,.2);}
+.b-gray{background:rgba(106,154,106,.08);color:var(--text2);border:1px solid rgba(106,154,106,.15);}
+.bpulse{display:inline-block;width:4px;height:4px;border-radius:50%;background:currentColor;
+  animation:bp 1.5s ease-in-out infinite;}
+@keyframes bp{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* ── INPUTS ── */
+.fld{margin-bottom:12px;}
+.fld-lbl{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+input,select,textarea{
+  width:100%;padding:9px 12px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:var(--fn);font-size:12px;
+  transition:all .2s;outline:none;
+}
+input:focus,select:focus{border-color:var(--acid);box-shadow:0 0 0 2px rgba(170,255,0,.08);}
+select option{background:var(--bg2);}
+
+/* ── TERMINAL ── */
+.term{
+  background:#000;border:1px solid var(--border);border-radius:var(--r);
+  font-family:var(--vt);font-size:15px;padding:12px;
+  overflow-y:auto;line-height:1.6;position:relative;
+}
+.term::-webkit-scrollbar{width:3px;}
+.term::-webkit-scrollbar-thumb{background:var(--border);}
+.term-hd{
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+  padding-bottom:8px;border-bottom:1px solid rgba(170,255,0,.1);
+}
+.term-dot{width:8px;height:8px;border-radius:50%;}
+.term-title{font-size:10px;color:var(--text2);letter-spacing:2px;margin-left:4px;}
+.tl{color:var(--text2);word-break:break-all;}
+.tl.ok{color:var(--acid);}
+.tl.er{color:var(--red);}
+.tl.wa{color:var(--amber);}
+.tl.inf{color:var(--teal);}
+.tl.cmd{color:#fff;}
+.tcursor{
+  display:inline-block;width:9px;height:15px;
+  background:var(--acid);box-shadow:0 0 6px var(--acid);
+  animation:tcur .8s step-end infinite;vertical-align:middle;
+}
+@keyframes tcur{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text2);padding:9px 12px;text-align:left;
+  border-bottom:1px solid var(--border2);background:var(--bg3);
+  position:sticky;top:0;
+}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--border2);font-size:12px;}
+.tbl tbody tr:hover td{background:rgba(170,255,0,.03);}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.mono{font-family:var(--fn);}
+
+/* ── PIPELINE FLOW ── */
+.flow-wrap{position:relative;overflow:hidden;}
+.flow-svg{display:block;width:100%;overflow:visible;}
+
+/* ── PIPELINE CARD ── */
+.pcrd{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--r);cursor:pointer;transition:all .2s;margin-bottom:6px;
+}
+.pcrd:hover{border-color:var(--border);background:var(--bg4);transform:translateX(3px);}
+.pcrd.sel{border-left:2px solid var(--acid);background:rgba(170,255,0,.04);}
+.pcrd-id{font-family:var(--vt);font-size:16px;color:var(--acid);}
+.pcrd-meta{font-size:10px;color:var(--text2);margin-top:2px;}
+
+/* ── PROGRESS ── */
+.prog-t{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-f{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+
+/* ── CONNECT OVERLAY ── */
+.cover{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(8,11,13,.95);backdrop-filter:blur(10px);
+}
+.cmodal{
+  width:460px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r2);padding:32px;
+  box-shadow:var(--glow-lg);
+  animation:cmodalIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes cmodalIn{from{opacity:0;transform:scale(.9)translateY(20px);}to{opacity:1;transform:none;}}
+.cmodal-title{font-family:var(--vt);font-size:32px;color:var(--acid);text-align:center;
+  letter-spacing:4px;margin-bottom:4px;text-shadow:0 0 20px rgba(170,255,0,.4);}
+.cmodal-sub{font-size:10px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.7;letter-spacing:1px;}
+.cerr{
+  font-size:10px;color:var(--red);background:var(--red2);
+  border:1px solid rgba(255,51,68,.25);border-radius:var(--r);
+  padding:8px 10px;margin-bottom:12px;
+}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;top:62px;right:16px;z-index:300;display:flex;flex-direction:column;gap:7px;pointer-events:none;}
+.toast{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--bg2);border-radius:var(--r);
+  font-size:11px;min-width:260px;max-width:360px;
+  pointer-events:all;box-shadow:0 8px 32px rgba(0,0,0,.6);
+  animation:tin .3s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.ok{border-left:2px solid var(--acid);}
+.toast.er{border-left:2px solid var(--red);}
+.toast.inf{border-left:2px solid var(--teal);}
+@keyframes tin{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
+
+/* ── SPINNER ── */
+.spin{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border);
+  border-top-color:var(--acid);border-radius:50%;animation:s .6s linear infinite;}
+@keyframes s{to{transform:rotate(360deg);}}
+
+/* ── SPLIT ── */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:860px){.split{grid-template-columns:1fr;}}
+.split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:1100px){.split3{grid-template-columns:1fr 1fr;}}
+
+/* ── PAGE HEADER ── */
+.phd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.pt{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--acid);letter-spacing:1px;}
+.ps{font-size:9px;color:var(--text2);letter-spacing:3px;margin-top:3px;text-transform:uppercase;}
+
+/* ── FADE IN ── */
+.fi{animation:fi .3s ease-out;}
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* staggered */
+.fi1{animation:fi .3s ease-out .05s both;}
+.fi2{animation:fi .3s ease-out .1s both;}
+.fi3{animation:fi .3s ease-out .15s both;}
+.fi4{animation:fi .3s ease-out .2s both;}
+.fi5{animation:fi .3s ease-out .25s both;}
+
+/* ── PKI CHAIN ── */
+.pki-node{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  transition:all .2s;
+}
+.pki-node:hover{border-color:var(--border);transform:translateX(4px);}
+.pki-conn{width:2px;height:18px;background:linear-gradient(var(--acid),rgba(170,255,0,.2));
+  margin-left:20px;opacity:.4;}
+
+/* ── COPY BUTTON ── */
+.copy-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+  font-size:9px;font-family:var(--fn);border:1px solid var(--border2);
+  border-radius:var(--r);background:none;cursor:pointer;color:var(--text2);
+  transition:all .2s;
+}
+.copy-btn:hover{border-color:var(--acid);color:var(--acid);}
+.copy-btn.copied{border-color:var(--acid);color:var(--acid);background:var(--acid3);}
+
+/* ── RING CHART ── */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-val{font-family:var(--vt);font-size:28px;color:var(--acid);}
+.ring-lbl{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+
+/* ── DRAG DROP ── */
+.dropzone{
+  border:2px dashed var(--border2);border-radius:var(--r2);
+  padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--acid);background:var(--acid4);}
+.dropzone-icon{font-size:40px;margin-bottom:10px;opacity:.4;}
+.dropzone-title{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--acid);
+  letter-spacing:2px;margin-bottom:6px;}
+.dropzone-sub{font-size:10px;color:var(--text2);}
+
+/* ── KEYWORD HIGHLIGHT ── */
+.hl{background:rgba(170,255,0,.2);color:var(--acid);border-radius:2px;padding:0 1px;}
+
+/* ── SEV BARS ── */
+.sev-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.sev-lbl{font-size:9px;width:75px;flex-shrink:0;letter-spacing:1px;text-transform:uppercase;}
+.sev-bar-w{flex:1;height:18px;background:var(--bg3);border-radius:3px;overflow:hidden;position:relative;}
+.sev-bar{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;
+  transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.sev-bar-n{font-size:10px;color:#000;font-weight:700;font-family:var(--fn);}
+
+/* ── GRID BG on cards ── */
+.gridbg::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(170,255,0,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(170,255,0,.03) 1px,transparent 1px);
+  background-size:24px 24px;pointer-events:none;border-radius:var(--r2);
+}
+
+/* ── KEYBOARD SHORTCUT OVERLAY ── */
+.kbd-overlay{
+  position:fixed;inset:0;z-index:500;background:rgba(8,11,13,.92);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+}
+.kbd-modal{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);
+  padding:28px;width:420px;animation:cmodalIn .3s ease-out;
+}
+.kbd-title{font-family:var(--vt);font-size:22px;color:var(--acid);letter-spacing:3px;margin-bottom:18px;text-align:center;}
+.kbd-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;
+  border-bottom:1px solid var(--border2);}
+.kbd-row:last-child{border-bottom:none;}
+.kbd-key{background:var(--bg3);border:1px solid var(--border);border-radius:4px;
+  padding:3px 9px;font-size:11px;color:var(--acid);font-family:var(--fn);}
+.kbd-desc{font-size:11px;color:var(--text);}
+
+/* ── TIMELINE ── */
+.tl-row{display:flex;align-items:stretch;gap:0;margin-bottom:4px;}
+.tl-label{width:120px;flex-shrink:0;font-size:10px;color:var(--text2);
+  display:flex;align-items:center;justify-content:flex-end;padding-right:12px;}
+.tl-track{flex:1;height:28px;background:var(--bg3);border-radius:3px;overflow:hidden;position:relative;}
+.tl-bar{position:absolute;top:4px;bottom:4px;border-radius:2px;
+  display:flex;align-items:center;padding:0 8px;font-size:9px;color:#000;font-weight:700;
+  transition:all .8s cubic-bezier(.4,0,.2,1);}
+
+/* ── COLLAPSIBLE ── */
+.collapsible{overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1);}
+.collapsible.closed{max-height:0!important;}
+</style>
 </head>
 <body>
+<canvas id="particle-canvas"></canvas>
 <div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useCallback } = React;
 
-// ── GitLab API helpers ──────────────────────────────────────────────────────
-function api(token, projectId, path, opts = {}) {
-  const base = `https://gitlab.com/api/v4/projects/${encodeURIComponent(projectId)}`;
-  return fetch(`${base}${path}`, {
-    ...opts,
-    headers: { 'PRIVATE-TOKEN': token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
-  }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e.message || 'API error')));
-}
-
-// ── Status badge ────────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
-  const map = {
-    success: 'badge-success', failed: 'badge-danger', running: 'badge-running',
-    pending: 'badge-warning', canceled: 'badge-gray', created: 'badge-gray',
-    skipped: 'badge-gray',
-  };
-  return <span className={`badge ${map[status] || 'badge-gray'}`}>{status}</span>;
-}
-
-// ── Severity badge ──────────────────────────────────────────────────────────
-function SevBadge({ sev }) {
-  return <span className={`badge sev-${sev}`} style={{padding:'2px 8px'}}>{sev}</span>;
-}
-
-// ── Config panel ────────────────────────────────────────────────────────────
-function ConfigPanel({ config, onSave }) {
-  const [tok, setTok] = useState(config.token || '');
-  const [pid, setPid] = useState(config.projectId || '');
-  return (
-    <div className="card">
-      <h2>🔑 GitLab Connection</h2>
-      <div className="label">GitLab Project ID or namespace/path</div>
-      <input value={pid} onChange={e => setPid(e.target.value)}
-        placeholder="e.g. bambelino85/university-management-system-sbom" />
-      <div className="label">Personal Access Token (api scope)</div>
-      <input type="password" value={tok} onChange={e => setTok(e.target.value)}
-        placeholder="glpat-xxxxxxxxxxxxxxxxxxxx" />
-      <button className="btn btn-primary" onClick={() => onSave({ token: tok, projectId: pid })}>
-        Connect
-      </button>
-    </div>
-  );
-}
-
-// ── Stats row ───────────────────────────────────────────────────────────────
-function StatsRow({ pipelines, vulns }) {
-  const passed  = pipelines.filter(p => p.status === 'success').length;
-  const failed  = pipelines.filter(p => p.status === 'failed').length;
-  const running = pipelines.filter(p => p.status === 'running').length;
-  const total   = vulns.length;
-  const critical = vulns.filter(v => v.vulnerability?.severity === 'Critical').length;
-  const high     = vulns.filter(v => v.vulnerability?.severity === 'High').length;
-  return (
-    <div className="row" style={{marginBottom: 24}}>
-      <div className="stat-box"><div className="num" style={{color:'var(--green)'}}>{passed}</div><div className="lbl">Pipelines Passed</div></div>
-      <div className="stat-box"><div className="num" style={{color:'var(--red)'}}>{failed}</div><div className="lbl">Pipelines Failed</div></div>
-      <div className="stat-box"><div className="num" style={{color:'#004085'}}>{running}</div><div className="lbl">Running</div></div>
-      <div className="stat-box"><div className="num" style={{color:'var(--navy)'}}>{total}</div><div className="lbl">Total Vulns</div></div>
-      <div className="stat-box"><div className="num" style={{color:'var(--red)'}}>{critical}</div><div className="lbl">Critical</div></div>
-      <div className="stat-box"><div className="num" style={{color:'var(--orange)'}}>{high}</div><div className="lbl">High</div></div>
-    </div>
-  );
-}
-
-// ── Pipeline trigger ────────────────────────────────────────────────────────
-function TriggerPanel({ config, onTriggered }) {
-  const [ref, setRef]       = useState('main');
-  const [ver, setVer]       = useState('1.0.0');
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg]       = useState(null);
-
-  async function trigger() {
-    setLoading(true); setMsg(null);
-    try {
-      const res = await api(config.token, config.projectId,
-        '/pipeline', {
-          method: 'POST',
-          body: JSON.stringify({ ref, variables: [{ key: 'APP_VERSION', value: ver }] })
-        });
-      setMsg({ type: 'success', text: `Pipeline #${res.id} triggered on "${ref}" ✅` });
-      onTriggered();
-    } catch(e) {
-      setMsg({ type: 'danger', text: `Error: ${e}` });
+<script>
+/* ── Particle canvas ── */
+(function(){
+  const c=document.getElementById('particle-canvas');
+  const ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;init();}
+  function init(){
+    pts=[];
+    for(let i=0;i<60;i++)pts.push({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+      r:Math.random()*1.5+.5
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(170,255,0,.4)';ctx.fill();
+      for(let j=i+1;j<pts.length;j++){
+        const q=pts[j];
+        const d=Math.hypot(p.x-q.x,p.y-q.y);
+        if(d<120){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle=`rgba(170,255,0,${.12*(1-d/120)})`;
+          ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
     }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  resize();draw();
+})();
+</script>
+
+<script type="text/babel">
+const {useState,useEffect,useCallback,useRef,useMemo,useReducer}=React;
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════ */
+const api=(tok,proj,path,opts={})=>{
+  const enc=encodeURIComponent(proj);
+  return fetch(`https://gitlab.com/api/v4/projects/${enc}${path}`,{
+    ...opts,headers:{'PRIVATE-TOKEN':tok,'Content-Type':'application/json',...(opts.headers||{})}
+  }).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.message||`HTTP ${r.status}`);return d;});
+};
+const fDur=s=>{if(!s)return'—';const m=Math.floor(s/60),sec=Math.round(s%60);return m?`${m}m ${sec}s`:`${sec}s`;};
+const fDate=d=>{if(!d)return'—';return new Date(d).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});};
+const fSha=s=>s?s.slice(0,7):'';
+const SEV_COLORS={Critical:'#ff3344',High:'#ff8c00',Medium:'#ffd700',Low:'#aaff00',Negligible:'#3a7a3a',Unknown:'#4a6a4a'};
+const SEV_ORDER=['Critical','High','Medium','Low','Negligible','Unknown'];
+
+/* Toast system */
+let _toast=null;
+function useToastSystem(){
+  const[toasts,setToasts]=useState([]);
+  _toast=useCallback((msg,type='inf')=>{
+    const id=Date.now();
+    setToasts(t=>[...t,{id,msg,type}]);
+    setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3800);
+  },[]);
+  return{toasts};
+}
+const toast=(m,t)=>_toast&&_toast(m,t);
+
+/* Status badge */
+function Bdg({s}){
+  if(s==='success')return<span className="badge b-ok"><span className="bpulse"/>PASSED</span>;
+  if(s==='failed')return<span className="badge b-fail"><span className="bpulse"/>FAILED</span>;
+  if(s==='running')return<span className="badge b-run"><span className="bpulse"/>RUNNING</span>;
+  if(s==='pending')return<span className="badge b-pend">PENDING</span>;
+  if(s==='canceled')return<span className="badge b-gray">CANCELED</span>;
+  return<span className="badge b-gray">{(s||'—').toUpperCase()}</span>;
+}
+
+/* Clock */
+function Clock(){
+  const[t,setT]=useState(new Date());
+  useEffect(()=>{const id=setInterval(()=>setT(new Date()),1000);return()=>clearInterval(id);},[]);
+  const h=String(t.getUTCHours()).padStart(2,'0');
+  const m=String(t.getUTCMinutes()).padStart(2,'0');
+  const sec=String(t.getUTCSeconds()).padStart(2,'0');
+  return<span className="hdr-clock">{h}:{m}:{sec} Z</span>;
+}
+
+/* Animated counter */
+function Counter({to,duration=800}){
+  const[v,setV]=useState(0);
+  useEffect(()=>{
+    let start=null,from=0;
+    const step=ts=>{
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/duration,1);
+      setV(Math.floor(from+(to-from)*p));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  },[to]);
+  return<>{v}</>;
+}
+
+/* Copy button */
+function CopyBtn({text}){
+  const[copied,setCopied]=useState(false);
+  function copy(){navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});}
+  return(
+    <button className={`copy-btn${copied?' copied':''}`} onClick={copy}>
+      {copied?'✓ COPIED':'⎘ COPY'}
+    </button>
+  );
+}
+
+/* Ring chart */
+function Ring({pct,color,size=80,stroke=8,label,val}){
+  const r=size/2-stroke/2;const circ=2*Math.PI*r;
+  const[p,setP]=useState(0);
+  useEffect(()=>{setTimeout(()=>setP(pct),100);},[pct]);
+  return(
+    <div className="ring-wrap">
+      <svg className="ring-svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size/2} cy={size/2} r={r} stroke="rgba(170,255,0,.08)" strokeWidth={stroke} fill="none"/>
+        <circle cx={size/2} cy={size/2} r={r} stroke={color||'var(--acid)'}
+          strokeWidth={stroke} fill="none"
+          strokeDasharray={`${circ} ${circ}`}
+          strokeDashoffset={circ-(circ*p/100)}
+          strokeLinecap="round"
+          style={{transition:'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)',filter:`drop-shadow(0 0 4px ${color||'var(--acid)'})`}}
+        />
+      </svg>
+      <div className="ring-val" style={{color:color||'var(--acid)'}}>{val??Math.round(p)}%</div>
+      {label&&<div className="ring-lbl">{label}</div>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT SCREEN
+═══════════════════════════════════════════════════════════ */
+const ASCII=`
+ ██████╗██████╗  ██████╗ ███╗   ███╗     ███████╗██████╗  ██████╗ ███╗   ███╗
+██╔════╝██╔══██╗██╔═══██╗████╗ ████║     ██╔════╝██╔══██╗██╔═══██╗████╗ ████║
+╚█████╗ ██████╔╝██║   ██║██╔████╔██║     ███████╗██████╔╝██║   ██║██╔████╔██║
+ ╚═══██╗██╔══██╗██║   ██║██║╚██╔╝██║     ╚════██║██╔══██╗██║   ██║██║╚██╔╝██║
+██████╔╝██████╔╝╚██████╔╝██║ ╚═╝ ██║     ███████║██████╔╝╚██████╔╝██║ ╚═╝ ██║
+╚═════╝ ╚═════╝  ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝`;
+
+const BOOT_LINES=[
+  '> INITIALIZING SBOM ATTESTATION SYSTEM v1.0.0',
+  '> LOADING CRYPTOGRAPHIC MODULES [RSA-4096 / EC-P384]',
+  '> ESTABLISHING CYCLONEDX SCHEMA VALIDATOR [v1.4]',
+  '> MOUNTING COMPONENT REGISTRY [6 CUSTOM / 13 TOTAL]',
+  '> ARMING GRYPE VULNERABILITY SCANNER [v0.109.0]',
+  '> CONNECTING TO GITLAB API [OAUTH2 / PAT]',
+  '> LOADING PIPELINE STATE MACHINE [5 STAGES]',
+  '> PKI CHAIN VERIFICATION [CA → SIGNING → PUBLIC]',
+  '> UNIVERSITY MANAGEMENT SYSTEM [C++ / MODULAR]',
+  '> LOCKHEED MARTIN SENIOR DESIGN PROJECT 2026',
+  '> SYSTEM READY ■',
+];
+
+function BootScreen({onDone}){
+  const[lines,setLines]=useState([]);
+  const[prog,setProg]=useState(0);
+  const[done,setDone]=useState(false);
+  useEffect(()=>{
+    let i=0;
+    const add=()=>{
+      if(i>=BOOT_LINES.length){setDone(true);setTimeout(onDone,600);return;}
+      setLines(l=>[...l,BOOT_LINES[i]]);
+      setProg(Math.round((i+1)/BOOT_LINES.length*100));
+      i++;setTimeout(add,180+Math.random()*120);
+    };
+    setTimeout(add,400);
+  },[]);
+  return(
+    <div className="boot-screen" style={{opacity:done?0:1,transition:'opacity .5s'}}>
+      <pre className="boot-ascii">{ASCII}</pre>
+      <div className="boot-log">
+        {lines.map((l,i)=>(
+          <div key={i} className="boot-log-line" style={{animationDelay:`${i*.05}s`,
+            color:l.includes('READY')?'var(--acid)':'var(--text2)'}}>
+            {l}
+          </div>
+        ))}
+      </div>
+      <div className="boot-progress">
+        <div className="boot-progress-fill" style={{width:`${prog}%`}}/>
+      </div>
+      <div style={{fontFamily:'var(--fn)',fontSize:9,color:'var(--text3)',marginTop:8,letterSpacing:'3px'}}>
+        LOADING {prog}%
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONNECT MODAL
+═══════════════════════════════════════════════════════════ */
+function ConnectModal({onConnect}){
+  const[pid,setPid]=useState('');
+  const[tok,setTok]=useState('');
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState('');
+
+  async function connect(){
+    if(!pid||!tok){setErr('PROJECT ID AND TOKEN REQUIRED');return;}
+    setLoading(true);setErr('');
+    try{
+      await api(tok,pid,'');
+      onConnect({token:tok,projectId:pid});
+    }catch(e){setErr('CONNECTION REFUSED: '+e.message.toUpperCase());}
     setLoading(false);
   }
 
-  return (
-    <div className="card">
-      <h2>🚀 Trigger SBOM Pipeline</h2>
-      {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
-      <div className="row">
-        <div style={{flex:1}}>
-          <div className="label">Branch / Ref</div>
-          <input value={ref} onChange={e => setRef(e.target.value)} placeholder="main" />
+  return(
+    <div className="cover">
+      <div className="cmodal gridbg">
+        <div style={{textAlign:'center',marginBottom:16}}>
+          <div style={{fontSize:48,marginBottom:8}}>🛡️</div>
+          <div className="cmodal-title">ACCESS CONTROL</div>
+          <div className="cmodal-sub">
+            SBOM ATTESTATION MISSION CONTROL<br/>
+            AUTHENTICATE TO ESTABLISH SECURE CHANNEL
+          </div>
         </div>
-        <div style={{flex:1}}>
-          <div className="label">App Version</div>
-          <input value={ver} onChange={e => setVer(e.target.value)} placeholder="1.0.0" />
+        <div className="fld">
+          <div className="fld-lbl">GitLab Project (namespace/project-name)</div>
+          <input value={pid} onChange={e=>setPid(e.target.value)}
+            placeholder="bambelino85/university-management-system-sbom"
+            onKeyDown={e=>e.key==='Enter'&&connect()}
+            autoFocus/>
+        </div>
+        <div className="fld">
+          <div className="fld-lbl">Personal Access Token (api scope)</div>
+          <input type="password" value={tok} onChange={e=>setTok(e.target.value)}
+            placeholder="glpat-xxxxxxxxxxxxxxxxxxxx"
+            onKeyDown={e=>e.key==='Enter'&&connect()}/>
+        </div>
+        {err&&<div className="cerr">⚠ {err}</div>}
+        <button className="btn btn-acid" style={{width:'100%',justifyContent:'center',padding:'11px',fontSize:'12px',letterSpacing:'2px'}}
+          onClick={connect} disabled={loading}>
+          {loading?<><span className="spin"/>&nbsp;AUTHENTICATING...</>:'⚡ ESTABLISH CONNECTION'}
+        </button>
+        <div style={{marginTop:12,fontSize:9,color:'var(--text3)',textAlign:'center',letterSpacing:'1px'}}>
+          TOKEN STORED IN SESSION ONLY · NEVER TRANSMITTED TO THIRD PARTIES
         </div>
       </div>
-      <button className="btn btn-success" onClick={trigger} disabled={loading}>
-        {loading ? <><span className="spinner"/> &nbsp;Triggering...</> : '▶ Run Pipeline'}
-      </button>
     </div>
   );
 }
 
-// ── Pipeline list ───────────────────────────────────────────────────────────
-function PipelineList({ config, refresh, onSelect }) {
-  const [pipelines, setPipelines] = useState([]);
-  const [loading, setLoading]     = useState(false);
+/* ═══════════════════════════════════════════════════════════
+   PIPELINE FLOW DIAGRAM  (animated SVG)
+═══════════════════════════════════════════════════════════ */
+function PipelineFlow({jobs=[]}){
+  const stages=[
+    {id:'build',label:'BUILD',icon:'🔨',color:'#aaff00'},
+    {id:'sbom_generate',label:'GEN',icon:'📄',color:'#00ffcc'},
+    {id:'sbom_sign',label:'SIGN',icon:'✍️',color:'#aa88ff'},
+    {id:'sbom_scan',label:'SCAN',icon:'🔍',color:'#ffaa00'},
+    {id:'report',label:'REPORT',icon:'📦',color:'#ff6688'},
+  ];
+  const[tick,setTick]=useState(0);
+  const[particles,setParticles]=useState([]);
+  useEffect(()=>{const id=setInterval(()=>setTick(t=>t+1),50);return()=>clearInterval(id);},[]);
+  useEffect(()=>{
+    setParticles(prev=>{
+      const updated=prev.map(p=>({...p,x:p.x+p.speed})).filter(p=>p.x<p.endX+10);
+      if(Math.random()<.15){
+        const seg=Math.floor(Math.random()*4);
+        const startX=80+seg*160;
+        updated.push({id:Date.now()+Math.random(),seg,x:startX,endX:startX+140,speed:2+Math.random()*2,y:60});
+      }
+      return updated.slice(-30);
+    });
+  },[tick]);
 
-  const load = useCallback(async () => {
-    if (!config.token) return;
-    setLoading(true);
-    try {
-      const data = await api(config.token, config.projectId, '/pipelines?per_page=10');
-      setPipelines(data);
-    } catch(e) { console.error(e); }
-    setLoading(false);
-  }, [config]);
+  const W=900,H=120;
+  const nodeX=i=>80+i*160;
+  const nY=60;
+  const getStatus=id=>{
+    const j=jobs.find(j=>j.stage===id);
+    return j?.status||'pending';
+  };
+  const statusColor=s=>s==='success'?'#aaff00':s==='failed'?'#ff3344':s==='running'?'#00ffcc':'#2d4a2d';
 
-  useEffect(() => { load(); }, [load, refresh]);
+  return(
+    <div className="flow-wrap">
+      <svg className="flow-svg" viewBox={`0 0 ${W} ${H}`} style={{height:120}}>
+        <defs>
+          <filter id="fglow">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" stroke="rgba(170,255,0,.4)" fill="none" strokeWidth="1"/>
+          </marker>
+        </defs>
 
-  return (
-    <div className="card">
-      <h2 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        📋 Recent Pipelines
-        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading}>
-          {loading ? <span className="spinner"/> : '↻ Refresh'}
-        </button>
-      </h2>
-      {pipelines.length === 0 && !loading && <p style={{color:'var(--gray)'}}>No pipelines found.</p>}
-      {pipelines.map(p => (
-        <div key={p.id} className="pipeline-row">
-          <StatusBadge status={p.status} />
-          <div style={{flex:1}}>
-            <div style={{fontSize:'0.88rem'}}>
-              <strong>#{p.id}</strong> &nbsp;
-              <span style={{color:'var(--gray)'}}>{p.ref}</span> &nbsp;
-              <span style={{color:'var(--gray)',fontSize:'0.8rem'}}>{new Date(p.created_at).toLocaleString()}</span>
+        {/* Edges */}
+        {stages.slice(0,-1).map((_,i)=>(
+          <line key={i}
+            x1={nodeX(i)+30} y1={nY} x2={nodeX(i+1)-30} y2={nY}
+            stroke="rgba(170,255,0,.15)" strokeWidth="1" markerEnd="url(#arr)"
+          />
+        ))}
+
+        {/* Particle stream */}
+        {particles.map(p=>(
+          <circle key={p.id} cx={p.x} cy={p.y} r={2.5}
+            fill={stages[p.seg]?.color||'var(--acid)'} opacity={.8}
+            filter="url(#fglow)"
+          />
+        ))}
+
+        {/* Nodes */}
+        {stages.map((s,i)=>{
+          const status=getStatus(s.id);
+          const sc=statusColor(status);
+          const dur=jobs.find(j=>j.stage===s.id)?.duration;
+          return(
+            <g key={s.id} transform={`translate(${nodeX(i)-30},${nY-30})`}>
+              <rect x={0} y={0} width={60} height={60} rx={6}
+                fill={`${sc}15`} stroke={sc} strokeWidth={1.5}
+                filter={status==='success'||status==='running'?'url(#fglow)':undefined}
+              />
+              <text x={30} y={24} textAnchor="middle" fontSize="16">{s.icon}</text>
+              <text x={30} y={40} textAnchor="middle" fill={sc}
+                fontSize="9" fontFamily="Syne Mono,monospace" letterSpacing="1">
+                {s.label}
+              </text>
+              <text x={30} y={52} textAnchor="middle" fill="rgba(170,255,0,.35)"
+                fontSize="7" fontFamily="Syne Mono,monospace">
+                {fDur(dur)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DEPENDENCY TREE (zoomable + pannable)
+═══════════════════════════════════════════════════════════ */
+function DepTree(){
+  const svgRef=useRef(null);
+  const[zoom,setZoom]=useState(1);
+  const[pan,setPan]=useState({x:0,y:0});
+  const[dragging,setDragging]=useState(false);
+  const[dragStart,setDragStart]=useState({x:0,y:0});
+  const[hover,setHover]=useState(null);
+
+  const nodes=[
+    {id:'main',label:'ums-main',type:'application',x:300,y:10,level:0,ver:'1.0.0',license:'MIT',desc:'Entry point & menus'},
+    {id:'db',label:'ums-database',type:'library',x:300,y:100,level:1,ver:'1.0.0',license:'MIT',desc:'File I/O & CRUD'},
+    {id:'stu',label:'ums-student',type:'library',x:100,y:190,level:2,ver:'1.0.0',license:'MIT',desc:'Student classes'},
+    {id:'fac',label:'ums-faculty',type:'library',x:300,y:190,level:2,ver:'1.0.0',license:'MIT',desc:'Faculty & Staff'},
+    {id:'crs',label:'ums-course',type:'library',x:500,y:190,level:2,ver:'1.0.0',license:'MIT',desc:'Course & Enrollment'},
+    {id:'per',label:'ums-person',type:'library',x:300,y:280,level:3,ver:'1.0.0',license:'MIT',desc:'Base Person class'},
+  ];
+  const edges=[['main','db'],['db','stu'],['db','fac'],['db','crs'],['stu','per'],['fac','per'],['crs','per']];
+  const levelColors=['#aaff00','#00ffcc','#aa88ff','#ffaa00'];
+  const BW=130,BH=36;
+
+  function onWheel(e){
+    e.preventDefault();
+    setZoom(z=>Math.min(2.5,Math.max(.4,z*(e.deltaY<0?1.1:.91))));
+  }
+  function onMouseDown(e){setDragging(true);setDragStart({x:e.clientX-pan.x,y:e.clientY-pan.y});}
+  function onMouseMove(e){if(dragging)setPan({x:e.clientX-dragStart.x,y:e.clientY-dragStart.y});}
+  function onMouseUp(){setDragging(false);}
+
+  return(
+    <div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+        <div style={{fontSize:9,color:'var(--text2)',letterSpacing:'2px'}}>SCROLL TO ZOOM · DRAG TO PAN · HOVER FOR DETAILS</div>
+        <div style={{display:'flex',gap:6}}>
+          <button className="btn btn-xs btn-acid" onClick={()=>setZoom(z=>Math.min(2.5,z*1.2))}>＋</button>
+          <button className="btn btn-xs" onClick={()=>{setZoom(1);setPan({x:0,y:0});}}>RESET</button>
+          <button className="btn btn-xs" onClick={()=>setZoom(z=>Math.max(.4,z*.83))}>－</button>
+        </div>
+      </div>
+      <div style={{height:350,border:'1px solid var(--border2)',borderRadius:'var(--r)',
+        overflow:'hidden',background:'#000',cursor:dragging?'grabbing':'grab',position:'relative'}}
+        onWheel={onWheel} onMouseDown={onMouseDown} onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+      >
+        <svg ref={svgRef} width="100%" height="100%">
+          <g transform={`translate(${pan.x+40},${pan.y+20}) scale(${zoom})`}>
+            <defs>
+              <filter id="ng">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            {/* Grid */}
+            {[-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10].map(i=>(
+              <React.Fragment key={i}>
+                <line x1={i*50} y1={-50} x2={i*50} y2={400} stroke="rgba(170,255,0,.04)" strokeWidth=".5"/>
+                <line x1={-50} y1={i*50} x2={700} y2={i*50} stroke="rgba(170,255,0,.04)" strokeWidth=".5"/>
+              </React.Fragment>
+            ))}
+            {/* Edges */}
+            {edges.map(([a,b],i)=>{
+              const n1=nodes.find(n=>n.id===a),n2=nodes.find(n=>n.id===b);
+              const x1=n1.x+BW/2,y1=n1.y+BH,x2=n2.x+BW/2,y2=n2.y;
+              const active=hover===a||hover===b;
+              return<path key={i}
+                d={`M${x1},${y1} C${x1},${(y1+y2)/2} ${x2},${(y1+y2)/2} ${x2},${y2}`}
+                stroke={active?levelColors[nodes.find(n=>n.id===a).level]:'rgba(170,255,0,.12)'}
+                strokeWidth={active?1.5:.8} fill="none"
+                style={{transition:'stroke .2s'}}
+              />;
+            })}
+            {/* Nodes */}
+            {nodes.map(n=>{
+              const c=levelColors[n.level];const isH=hover===n.id;
+              return(
+                <g key={n.id} transform={`translate(${n.x},${n.y})`}
+                  onMouseEnter={()=>setHover(n.id)} onMouseLeave={()=>setHover(null)}
+                  style={{cursor:'pointer'}}>
+                  <rect x={0} y={0} width={BW} height={BH} rx={4}
+                    fill={isH?`${c}20`:'rgba(12,16,21,.95)'} stroke={isH?c:'rgba(170,255,0,.15)'}
+                    strokeWidth={isH?1.5:1}
+                    filter={isH?'url(#ng)':undefined}
+                    style={{transition:'all .2s'}}
+                  />
+                  <rect x={0} y={0} width={3} height={BH} rx={2} fill={c} opacity={.8}/>
+                  <text x={BW/2+2} y={BH/2+1} textAnchor="middle" dominantBaseline="middle"
+                    fill={isH?c:'#c8e8c8'} fontSize={10}
+                    fontFamily="Syne Mono,monospace"
+                    style={{transition:'fill .2s'}}>{n.label}
+                  </text>
+                  {/* Tooltip */}
+                  {isH&&(
+                    <g>
+                      <rect x={BW+8} y={-4} width={110} height={58} rx={4}
+                        fill="#080b0d" stroke={`${c}40`}/>
+                      <text x={BW+14} y={10} fill={c} fontSize={9} fontFamily="Syne Mono,monospace">Level {n.level}</text>
+                      <text x={BW+14} y={22} fill="#6a9a6a" fontSize={8} fontFamily="Syne Mono,monospace">{n.type}</text>
+                      <text x={BW+14} y={33} fill="#6a9a6a" fontSize={8} fontFamily="Syne Mono,monospace">v{n.ver} · {n.license}</text>
+                      <text x={BW+14} y={44} fill="#3a6a3a" fontSize={7} fontFamily="Syne Mono,monospace">{n.desc}</text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+        <div style={{position:'absolute',bottom:8,right:8,fontSize:9,color:'var(--text3)',fontFamily:'var(--fn)'}}>
+          ZOOM: {Math.round(zoom*100)}%
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════════ */
+function Dashboard({config,setNav}){
+  const[pipelines,setPipelines]=useState([]);
+  const[loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    api(config.token,config.projectId,'/pipelines?per_page=20')
+      .then(setPipelines).catch(()=>{}).finally(()=>setLoading(false));
+  },[]);
+
+  const s=useMemo(()=>{
+    const ok=pipelines.filter(p=>p.status==='success').length;
+    const fail=pipelines.filter(p=>p.status==='failed').length;
+    const run=pipelines.filter(p=>p.status==='running').length;
+    const dur=pipelines.filter(p=>p.duration);
+    const avg=dur.length?Math.round(dur.reduce((a,b)=>a+b.duration,0)/dur.length):0;
+    const rate=pipelines.length?Math.round(ok/pipelines.length*100):0;
+    return{ok,fail,run,total:pipelines.length,avg,rate};
+  },[pipelines]);
+
+  const latest=pipelines[0];
+  const[latestJobs,setLatestJobs]=useState([]);
+  useEffect(()=>{
+    if(!latest)return;
+    api(config.token,config.projectId,`/pipelines/${latest.id}/jobs`).then(setLatestJobs).catch(()=>{});
+  },[latest?.id]);
+
+  return(
+    <div className="page">
+      <div className="phd fi1">
+        <div>
+          <div className="pt">MISSION OVERVIEW</div>
+          <div className="ps">SBOM ATTESTATION PIPELINE · UNIVERSITY MANAGEMENT SYSTEM</div>
+        </div>
+        <button className="btn btn-acid" onClick={()=>setNav('pipelines')}>⚡ TRIGGER PIPELINE</button>
+      </div>
+
+      {/* Stats */}
+      <div className="sg fi2">
+        {[
+          {v:s.total,l:'Total Pipelines',icon:'📊',c:'var(--acid)'},
+          {v:s.ok,l:'Passed',icon:'✅',c:'var(--acid)'},
+          {v:s.fail,l:'Failed',icon:'❌',c:'var(--red)'},
+          {v:s.run,l:'Running',icon:'⚡',c:'var(--teal)'},
+          {v:s.rate+'%',l:'Success Rate',icon:'📈',c:s.rate>=80?'var(--acid)':'var(--amber)'},
+          {v:fDur(s.avg),l:'Avg Duration',icon:'⏱',c:'#aa88ff'},
+        ].map((x,i)=>(
+          <div className="sc" key={i} style={{'--sc-color':x.c}}>
+            <div className="sc-icon">{x.icon}</div>
+            <div className="sc-val">
+              {loading?'—':typeof x.v==='number'?<Counter to={x.v}/>:x.v}
             </div>
-            <div style={{fontSize:'0.8rem',color:'var(--gray)'}}>{p.sha?.substring(0,8)}</div>
+            <div className="sc-lbl">{x.l}</div>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => onSelect(p)}>
-            View →
+        ))}
+      </div>
+
+      {/* Pipeline flow + latest */}
+      <div className="split fi3">
+        <div className="card gridbg">
+          <div className="card-hd">
+            <div className="card-t"><span className="card-t-icon">⚙️</span>LATEST PIPELINE FLOW</div>
+            {latest&&<Bdg s={latest.status}/>}
+          </div>
+          <div className="card-body">
+            {latest?(
+              <>
+                <div style={{fontSize:10,color:'var(--text2)',fontFamily:'var(--fn)',marginBottom:10}}>
+                  #{latest.id} · {latest.ref} · {fSha(latest.sha)} · {fDate(latest.created_at)}
+                </div>
+                <PipelineFlow jobs={latestJobs}/>
+              </>
+            ):<div style={{textAlign:'center',padding:'24px 0',color:'var(--text3)'}}>NO PIPELINES</div>}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-hd">
+            <div className="card-t"><span className="card-t-icon">📋</span>RECENT PIPELINES</div>
+            <button className="btn btn-xs" onClick={()=>setNav('pipelines')}>VIEW ALL →</button>
+          </div>
+          <div className="card-body" style={{padding:'8px 0'}}>
+            {pipelines.slice(0,6).map(p=>(
+              <div key={p.id} className="pcrd" onClick={()=>setNav('pipelines')}>
+                <Bdg s={p.status}/>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                    <span className="pcrd-id">#{p.id}</span>
+                    <span style={{fontFamily:'var(--fn)',fontSize:10,color:'#aa88ff'}}>{fSha(p.sha)}</span>
+                  </div>
+                  <div className="pcrd-meta">{p.ref} · {fDate(p.created_at)}</div>
+                </div>
+                <div style={{fontSize:10,color:'var(--text2)',fontFamily:'var(--fn)'}}>{fDur(p.duration)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Dep Tree */}
+      <div className="card fi4">
+        <div className="card-hd">
+          <div className="card-t"><span className="card-t-icon">🧬</span>COMPONENT DEPENDENCY GRAPH</div>
+          <div style={{fontSize:9,color:'var(--text2)',letterSpacing:'1px'}}>6 NODES · 4 LEVELS · 7 EDGES</div>
+        </div>
+        <div className="card-body"><DepTree/></div>
+      </div>
+
+      {/* Project Info */}
+      <div className="split3 fi5">
+        {[
+          {title:'TOOLS',icon:'🛠',rows:[['Syft','v1.42.1'],['Grype','v0.109.0'],['CycloneDX-CLI','v0.30.0'],['Trivy','v0.69.2'],['Hoppr','v1.14.1'],['OpenSSL','3.0.13']]},
+          {title:'PLATFORMS',icon:'☁️',rows:[['GitHub','Source Repository'],['GitLab','CI/CD Engine'],['Docker Hub','Container Registry'],['GitLab Pages','UI Hosting'],['Ubuntu 22.04','Build Base'],['WSL2','Dev Environment']]},
+          {title:'ARTIFACTS',icon:'📦',rows:[['university_app','C++ Binary'],['holistic-sbom.json','CycloneDX 1.4'],['holistic-sbom-signed.xml','RSA Signed'],['vuln-report.json','Grype Output'],['vuln-analysis-report.html','HTML Report'],['sbom-rsa-public.pem','Public Key']]},
+        ].map((g,i)=>(
+          <div className="card" key={i}>
+            <div className="card-hd"><div className="card-t"><span className="card-t-icon">{g.icon}</span>{g.title}</div></div>
+            <table className="tbl" style={{padding:0}}>
+              <tbody>
+                {g.rows.map(([k,v])=>(
+                  <tr key={k}>
+                    <td style={{color:'var(--text2)',fontSize:10,width:120,fontFamily:'var(--fn)'}}>{k}</td>
+                    <td style={{fontSize:11,color:'var(--acid)',fontFamily:'var(--fn)'}}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PIPELINES PAGE
+═══════════════════════════════════════════════════════════ */
+function PipelinesPage({config}){
+  const[pipelines,setPipelines]=useState([]);
+  const[selected,setSelected]=useState(null);
+  const[loading,setLoading]=useState(true);
+  const[polling,setPolling]=useState(false);
+  const[ref,setRef]=useState('main');
+  const[ver,setVer]=useState('1.0.0');
+  const[triggering,setTriggering]=useState(false);
+  const pollRef=useRef(null);
+
+  const load=useCallback(async()=>{
+    try{
+      const d=await api(config.token,config.projectId,'/pipelines?per_page=15');
+      setPipelines(d);
+      if(selected){const u=d.find(p=>p.id===selected.id);if(u)setSelected(u);}
+    }catch(e){toast('LOAD FAILED: '+e.message,'er');}
+    setLoading(false);
+  },[config,selected?.id]);
+
+  useEffect(()=>{load();},[]);
+  useEffect(()=>{
+    if(polling){pollRef.current=setInterval(load,5000);return()=>clearInterval(pollRef.current);}
+    else clearInterval(pollRef.current);
+  },[polling,load]);
+
+  async function trigger(){
+    setTriggering(true);
+    try{
+      const p=await api(config.token,config.projectId,'/pipeline',{
+        method:'POST',body:JSON.stringify({ref,variables:[{key:'APP_VERSION',value:ver,variable_type:'env_var'}]})
+      });
+      toast(`PIPELINE #${p.id} LAUNCHED ON "${ref}"','ok`);
+      setPolling(true);setTimeout(load,1500);
+    }catch(e){toast('TRIGGER FAILED: '+e.message,'er');}
+    setTriggering(false);
+  }
+
+  return(
+    <div className="page">
+      <div className="phd fi1">
+        <div>
+          <div className="pt">PIPELINE CONTROL</div>
+          <div className="ps">LAUNCH · MONITOR · INSPECT · DOWNLOAD</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button className={`btn ${polling?'btn-amber':'btn-teal'}`} onClick={()=>setPolling(!polling)}>
+            {polling?<><span className="spin"/>&nbsp;POLLING</>:'🔄 AUTO-POLL'}
           </button>
+          <button className="btn" onClick={load}>{loading?<span className="spin"/>:'↻'} REFRESH</button>
+        </div>
+      </div>
+
+      {/* Trigger */}
+      <div className="card fi2">
+        <div className="card-hd"><div className="card-t"><span className="card-t-icon">⚡</span>LAUNCH PIPELINE</div></div>
+        <div className="card-body">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:10,alignItems:'end'}}>
+            <div className="fld" style={{margin:0}}>
+              <div className="fld-lbl">Branch / Ref</div>
+              <input value={ref} onChange={e=>setRef(e.target.value)} placeholder="main"/>
+            </div>
+            <div className="fld" style={{margin:0}}>
+              <div className="fld-lbl">App Version</div>
+              <input value={ver} onChange={e=>setVer(e.target.value)} placeholder="1.0.0"/>
+            </div>
+            <button className="btn btn-acid" style={{height:38,padding:'0 20px'}} onClick={trigger} disabled={triggering}>
+              {triggering?<><span className="spin"/>&nbsp;LAUNCHING...</>:'▶ LAUNCH'}
+            </button>
+          </div>
+          <div style={{marginTop:10,fontFamily:'var(--fn)',fontSize:9,color:'var(--text3)',letterSpacing:'1px'}}>
+            STAGES: build:cpp → sbom:generate → sbom:sign → sbom:scan → report:publish
+          </div>
+        </div>
+      </div>
+
+      <div className="split fi3">
+        {/* List */}
+        <div>
+          <div style={{fontFamily:'var(--fn)',fontSize:9,color:'var(--text2)',letterSpacing:'2px',marginBottom:10,textTransform:'uppercase'}}>
+            Recent ({pipelines.length})
+          </div>
+          {loading?<div style={{textAlign:'center',padding:20}}><span className="spin"/></div>:null}
+          {pipelines.map(p=>(
+            <div key={p.id} className={`pcrd${selected?.id===p.id?' sel':''}`} onClick={()=>setSelected(p)}>
+              <Bdg s={p.status}/>
+              <div style={{flex:1}}>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <span className="pcrd-id">#{p.id}</span>
+                  <span style={{fontFamily:'var(--fn)',fontSize:10,color:'#aa88ff'}}>{fSha(p.sha)}</span>
+                </div>
+                <div className="pcrd-meta">{p.ref} · {fDate(p.created_at)} · {fDur(p.duration)}</div>
+              </div>
+              <span style={{color:'var(--acid)'}}>›</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Detail */}
+        <div>
+          {selected
+            ?<PipelineDetail config={config} pipeline={selected} key={selected.id}/>
+            :<div className="card" style={{height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <div style={{textAlign:'center',padding:40}}>
+                <div style={{fontSize:36,opacity:.2,marginBottom:10}}>👈</div>
+                <div style={{fontSize:10,color:'var(--text3)',letterSpacing:'2px'}}>SELECT A PIPELINE</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Pipeline Detail */
+function PipelineDetail({config,pipeline}){
+  const[jobs,setJobs]=useState([]);
+  const[logJob,setLogJob]=useState(null);
+  const[log,setLog]=useState('');
+  const[logLoading,setLogLoading]=useState(false);
+  const logRef=useRef(null);
+  const[timelineOpen,setTimelineOpen]=useState(true);
+
+  useEffect(()=>{
+    api(config.token,config.projectId,`/pipelines/${pipeline.id}/jobs`).then(setJobs).catch(()=>{});
+  },[pipeline.id]);
+
+  async function viewLog(job){
+    setLogJob(job);setLog('LOADING...');setLogLoading(true);
+    try{
+      const r=await fetch(
+        `https://gitlab.com/api/v4/projects/${encodeURIComponent(config.projectId)}/jobs/${job.id}/trace`,
+        {headers:{'PRIVATE-TOKEN':config.token}}
+      );
+      const t=await r.text();
+      setLog(t.replace(/\x1B\[[0-9;]*[mGKH]/g,'').replace(/\r\n/g,'\n').slice(-6000)||'(empty)');
+    }catch(e){setLog('ERROR: '+e.message);}
+    setLogLoading(false);
+    setTimeout(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight;},80);
+  }
+
+  function parseLog(raw){
+    return raw.split('\n').slice(-100).map((line,i)=>{
+      let cls='tl';
+      if(line.startsWith('$'))cls='tl cmd';
+      else if(/error|fail/i.test(line))cls='tl er';
+      else if(/warn/i.test(line))cls='tl wa';
+      else if(/ok|verified|success|passed/i.test(line))cls='tl ok';
+      else if(/info|\[/i.test(line))cls='tl inf';
+      return<div key={i} className={cls}>{line||'\u00a0'}</div>;
+    });
+  }
+
+  /* Gantt timeline */
+  const minStart=jobs.length?Math.min(...jobs.filter(j=>j.started_at).map(j=>new Date(j.started_at).getTime())):0;
+  const maxEnd=jobs.length?Math.max(...jobs.filter(j=>j.finished_at).map(j=>new Date(j.finished_at).getTime())):0;
+  const totalMs=maxEnd-minStart||1;
+
+  return(
+    <div className="card fi">
+      <div className="card-hd">
+        <div className="card-t"><span className="card-t-icon">🔬</span>#{pipeline.id}</div>
+        <Bdg s={pipeline.status}/>
+      </div>
+      <div className="card-body">
+        <div style={{fontSize:10,color:'var(--text2)',fontFamily:'var(--fn)',marginBottom:12}}>
+          {pipeline.ref} · {fSha(pipeline.sha)} · {fDate(pipeline.created_at)} · {fDur(pipeline.duration)}
+        </div>
+
+        <PipelineFlow jobs={jobs}/>
+
+        {/* Timeline */}
+        {jobs.some(j=>j.started_at)&&(
+          <div style={{marginTop:14}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,cursor:'pointer'}}
+              onClick={()=>setTimelineOpen(!timelineOpen)}>
+              <div style={{fontSize:9,color:'var(--text2)',letterSpacing:'2px'}}>GANTT TIMELINE</div>
+              <div style={{color:'var(--acid)',fontSize:12}}>{timelineOpen?'▾':'▸'}</div>
+            </div>
+            <div className={`collapsible${timelineOpen?'':' closed'}`} style={{maxHeight:timelineOpen?'300px':'0'}}>
+              {jobs.filter(j=>j.started_at).map(j=>{
+                const start=new Date(j.started_at).getTime();
+                const end=j.finished_at?new Date(j.finished_at).getTime():start+5000;
+                const left=((start-minStart)/totalMs)*100;
+                const width=((end-start)/totalMs)*100;
+                const c=j.status==='success'?'var(--acid)':j.status==='failed'?'var(--red)':j.status==='running'?'var(--teal)':'var(--text3)';
+                return(
+                  <div className="tl-row" key={j.id}>
+                    <div className="tl-label">{j.name}</div>
+                    <div className="tl-track">
+                      <div className="tl-bar" style={{left:`${left}%`,width:`${Math.max(width,2)}%`,background:c}}>
+                        <span style={{fontSize:8,color:'#000',fontWeight:700,whiteSpace:'nowrap'}}>{fDur(j.duration)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Jobs table */}
+        <table className="tbl" style={{marginTop:12}}>
+          <thead><tr>
+            <th>JOB</th><th>STATUS</th><th>DURATION</th><th>ACTIONS</th>
+          </tr></thead>
+          <tbody>
+            {jobs.map(j=>(
+              <tr key={j.id}>
+                <td className="mono" style={{fontSize:11,color:'var(--acid)'}}>{j.name}</td>
+                <td><Bdg s={j.status}/></td>
+                <td className="mono" style={{fontSize:10,color:'var(--text2)'}}>{fDur(j.duration)}</td>
+                <td>
+                  <div style={{display:'flex',gap:4}}>
+                    <button className="btn btn-xs btn-acid" onClick={()=>viewLog(j)}>📋 LOG</button>
+                    <button className="btn btn-xs btn-teal"
+                      onClick={()=>window.open(`https://gitlab.com/${encodeURIComponent(config.projectId)}/-/jobs/${j.id}/artifacts/download`,'_blank')}>
+                      ⬇ ART
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Log terminal */}
+        {logJob&&(
+          <div style={{marginTop:14}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <span style={{fontSize:9,color:'var(--acid)',letterSpacing:'2px'}}>LOG: {logJob.name}</span>
+                <Bdg s={logJob.status}/>
+              </div>
+              <button className="btn btn-xs btn-red" onClick={()=>setLogJob(null)}>✕ CLOSE</button>
+            </div>
+            <div className="term" style={{maxHeight:240}} ref={logRef}>
+              <div className="term-hd">
+                <div className="term-dot" style={{background:'#ff5f57'}}/>
+                <div className="term-dot" style={{background:'#febc2e'}}/>
+                <div className="term-dot" style={{background:'#28c840'}}/>
+                <span className="term-title">JOB #{logJob.id} · {logJob.name}</span>
+              </div>
+              {logLoading?<div style={{color:'var(--text2)'}}><span className="spin"/> LOADING...</div>:parseLog(log)}
+              {!logLoading&&<span className="tcursor"/>}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SBOM VIEWER
+═══════════════════════════════════════════════════════════ */
+function SBOMPage(){
+  const[sbom,setSbom]=useState(null);
+  const[search,setSearch]=useState('');
+  const[typeF,setTypeF]=useState('All');
+  const[view,setView]=useState('table');
+  const[err,setErr]=useState('');
+  const[drag,setDrag]=useState(false);
+  const[hlSearch,setHlSearch]=useState('');
+
+  function load(file){
+    if(!file)return;
+    new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(file);})
+      .then(txt=>{try{setSbom(JSON.parse(txt));setErr('');}catch{setErr('INVALID JSON — UPLOAD holistic-sbom.json FROM PIPELINE ARTIFACTS');}})
+      .catch(()=>setErr('FILE READ ERROR'));
+  }
+
+  const types=useMemo(()=>sbom?['All',...new Set(sbom.components?.map(c=>c.type)||[])]:[]  ,[sbom]);
+  const filtered=useMemo(()=>{
+    if(!sbom?.components)return[];
+    const q=search.toLowerCase();
+    return sbom.components.filter(c=>{
+      const mq=!q||[c.name,c.version,c.type,c.supplier?.name].some(v=>v?.toLowerCase().includes(q));
+      const mt=typeF==='All'||c.type===typeF;
+      return mq&&mt;
+    });
+  },[sbom,search,typeF]);
+
+  function hl(text){
+    if(!hlSearch||!text)return text;
+    const idx=text.toLowerCase().indexOf(hlSearch.toLowerCase());
+    if(idx<0)return text;
+    return<>{text.slice(0,idx)}<span className="hl">{text.slice(idx,idx+hlSearch.length)}</span>{text.slice(idx+hlSearch.length)}</>;
+  }
+
+  if(!sbom)return(
+    <div className="page">
+      <div className="phd fi1"><div><div className="pt">SBOM VIEWER</div><div className="ps">COMPONENT INTELLIGENCE · CYCLONEDX 1.4</div></div></div>
+      <div className="card fi2">
+        <div className="card-body">
+          <div className={`dropzone${drag?' drag':''}`}
+            onDragOver={e=>{e.preventDefault();setDrag(true);}} onDragLeave={()=>setDrag(false)}
+            onDrop={e=>{e.preventDefault();setDrag(false);load(e.dataTransfer.files[0]);}}
+            onClick={()=>document.getElementById('sbf').click()}>
+            <div className="dropzone-icon">📦</div>
+            <div className="dropzone-title">DROP holistic-sbom.json HERE</div>
+            <div className="dropzone-sub">Or click to browse · Download from pipeline artifacts → report:publish</div>
+            <input id="sbf" type="file" accept=".json" style={{display:'none'}} onChange={e=>load(e.target.files[0])}/>
+          </div>
+          {err&&<div style={{marginTop:12,color:'var(--red)',fontSize:10,fontFamily:'var(--fn)',padding:'8px 10px',background:'var(--red2)',borderRadius:'var(--r)',border:'1px solid rgba(255,51,68,.25)'}}>{err}</div>}
+        </div>
+      </div>
+    </div>
+  );
+
+  const licCounts=sbom.components?.reduce((a,c)=>{
+    const l=c.licenses?.[0]?.license?.id||c.licenses?.[0]?.expression||'Unknown';a[l]=(a[l]||0)+1;return a;
+  },{})??{};
+
+  return(
+    <div className="page">
+      <div className="phd fi1">
+        <div><div className="pt">SBOM VIEWER</div><div className="ps">COMPONENT INTELLIGENCE</div></div>
+        <button className="btn btn-red btn-sm" onClick={()=>setSbom(null)}>✕ CLEAR</button>
+      </div>
+
+      <div className="sg fi2" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+        {[
+          {v:sbom.components?.length||0,l:'Components',c:'var(--acid)'},
+          {v:Object.keys(licCounts).length,l:'Licenses',c:'var(--teal)'},
+          {v:sbom.specVersion,l:'CycloneDX',c:'#aa88ff'},
+          {v:sbom.metadata?.component?.name||'N/A',l:'Root Component',c:'var(--amber)'},
+        ].map((x,i)=>(
+          <div className="sc" key={i} style={{'--sc-color':x.c}}>
+            <div className="sc-val" style={{fontSize:typeof x.v==='number'&&x.v>999?20:28}}>{x.v}</div>
+            <div className="sc-lbl">{x.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card fi3">
+        <div className="card-body">
+          <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap',alignItems:'center'}}>
+            <input style={{flex:1,minWidth:160}} value={search}
+              onChange={e=>{setSearch(e.target.value);setHlSearch(e.target.value);}}
+              placeholder="🔍 Search components, versions, suppliers..."/>
+            <select style={{width:140}} value={typeF} onChange={e=>setTypeF(e.target.value)}>
+              {types.map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+            <div style={{display:'flex',border:'1px solid var(--border2)',borderRadius:'var(--r)',overflow:'hidden'}}>
+              {['table','cards'].map(v=>(
+                <button key={v} className={`btn btn-xs${view===v?' btn-acid':''}`}
+                  style={{borderRadius:0,border:'none'}} onClick={()=>setView(v)}>
+                  {v==='table'?'≡':'⊞'} {v.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <span style={{fontSize:9,color:'var(--text2)',fontFamily:'var(--fn)'}}>{filtered.length}/{sbom.components?.length||0} SHOWN</span>
+          </div>
+
+          {view==='table'?(
+            <div style={{overflowX:'auto'}}>
+              <table className="tbl">
+                <thead><tr>
+                  <th>COMPONENT</th><th>VERSION</th><th>TYPE</th><th>SUPPLIER</th><th>LICENSE</th>
+                </tr></thead>
+                <tbody>
+                  {filtered.map((c,i)=>(
+                    <tr key={i}>
+                      <td style={{fontFamily:'var(--fn)',fontSize:12,color:'var(--acid)'}}>{hl(c.name)}</td>
+                      <td style={{fontFamily:'var(--fn)',fontSize:11}}>{c.version||'—'}</td>
+                      <td><span style={{fontSize:9,padding:'2px 7px',background:'rgba(170,136,255,.1)',color:'#aa88ff',borderRadius:'20px',border:'1px solid rgba(170,136,255,.2)',fontFamily:'var(--fn)'}}>{c.type||'—'}</span></td>
+                      <td style={{fontSize:11,color:'var(--text2)'}}>{c.supplier?.name||'—'}</td>
+                      <td style={{fontFamily:'var(--fn)',fontSize:11,color:'var(--teal)'}}>{c.licenses?.[0]?.license?.id||c.licenses?.[0]?.expression||'—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ):(
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:10}}>
+              {filtered.map((c,i)=>(
+                <div key={i} style={{background:'var(--bg3)',border:'1px solid var(--border2)',borderRadius:'var(--r)',padding:'12px',transition:'all .2s'}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='var(--acid)'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border2)'}
+                >
+                  <div style={{fontFamily:'var(--fn)',fontSize:11,color:'var(--acid)',marginBottom:4}}>{hl(c.name)}</div>
+                  <div style={{fontSize:10,color:'var(--text2)',marginBottom:6}}>v{c.version||'—'} · {c.type||'—'}</div>
+                  <div style={{fontSize:9,color:'var(--teal)'}}>{c.licenses?.[0]?.license?.id||'—'}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VULNERABILITY PAGE
+═══════════════════════════════════════════════════════════ */
+function VulnPage(){
+  const[data,setData]=useState(null);
+  const[flt,setFlt]=useState('All');
+  const[search,setSearch]=useState('');
+  const[err,setErr]=useState('');
+  const[drag,setDrag]=useState(false);
+
+  function load(file){
+    if(!file)return;
+    new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(file);})
+      .then(txt=>{try{setData(JSON.parse(txt));setErr('');}catch{setErr('INVALID JSON');}})
+      .catch(()=>setErr('FILE READ ERROR'));
+  }
+
+  const matches=data?.matches||[];
+  const sevCounts=useMemo(()=>matches.reduce((a,m)=>{
+    const s=m.vulnerability?.severity||'Unknown';a[s]=(a[s]||0)+1;return a;
+  },{}),[matches]);
+  const maxC=Math.max(...Object.values(sevCounts),1);
+  const total=matches.length;
+
+  const filtered=useMemo(()=>{
+    let arr=[...matches];
+    if(flt!=='All')arr=arr.filter(m=>(m.vulnerability?.severity||'Unknown')===flt);
+    if(search){const q=search.toLowerCase();arr=arr.filter(m=>
+      (m.vulnerability?.id||'').toLowerCase().includes(q)||(m.artifact?.name||'').toLowerCase().includes(q)
+    );}
+    return arr;
+  },[matches,flt,search]);
+
+  if(!data)return(
+    <div className="page">
+      <div className="phd fi1"><div><div className="pt">VULNERABILITY SCANNER</div><div className="ps">GRYPE ANALYSIS · CVE INTELLIGENCE · NVD LINKS</div></div></div>
+      <div className="card fi2">
+        <div className="card-body">
+          <div className={`dropzone${drag?' drag':''}`}
+            onDragOver={e=>{e.preventDefault();setDrag(true);}} onDragLeave={()=>setDrag(false)}
+            onDrop={e=>{e.preventDefault();setDrag(false);load(e.dataTransfer.files[0]);}}
+            onClick={()=>document.getElementById('vf').click()}
+            style={{borderColor:drag?'var(--red)':'var(--border2)'}}>
+            <div className="dropzone-icon">🔍</div>
+            <div className="dropzone-title" style={{color:'var(--red)'}}>DROP vuln-report.json HERE</div>
+            <div className="dropzone-sub">Download from pipeline artifacts → report:publish → vuln-report.json</div>
+            <input id="vf" type="file" accept=".json" style={{display:'none'}} onChange={e=>load(e.target.files[0])}/>
+          </div>
+          {err&&<div style={{marginTop:12,color:'var(--red)',fontSize:10,padding:'8px 10px',background:'var(--red2)',borderRadius:'var(--r)'}}>{err}</div>}
+        </div>
+      </div>
+    </div>
+  );
+
+  const rate=Math.max(0,Math.round(100-((sevCounts['Critical']||0)*20+(sevCounts['High']||0)*8+(sevCounts['Medium']||0)*3)));
+
+  return(
+    <div className="page">
+      <div className="phd fi1">
+        <div><div className="pt">VULNERABILITY SCANNER</div><div className="ps">GRYPE v{data?.descriptor?.version||'—'} · {fDate(data?.descriptor?.timestamp)}</div></div>
+        <button className="btn btn-red btn-sm" onClick={()=>setData(null)}>✕ CLEAR</button>
+      </div>
+
+      <div className="split fi2">
+        {/* Donut + chart */}
+        <div className="card">
+          <div className="card-hd"><div className="card-t"><span className="card-t-icon">📊</span>SEVERITY DISTRIBUTION</div></div>
+          <div className="card-body">
+            <div style={{display:'flex',justifyContent:'space-around',marginBottom:16}}>
+              <Ring pct={total===0?100:rate} color={total===0?'var(--acid)':'var(--red)'} label="SECURITY SCORE" val={total===0?'✓':rate+'%'}/>
+              <Ring pct={total===0?100:Math.max(0,100-Math.round((sevCounts['Critical']||0)*10))} color="var(--amber)" label="CRITICAL CLEAR" size={70} stroke={6}/>
+              <Ring pct={100} color="var(--teal)" label="SCANNED" size={70} stroke={6} val="100%"/>
+            </div>
+            {total===0?(
+              <div style={{textAlign:'center',padding:'12px 0'}}>
+                <div style={{fontFamily:'var(--vt)',fontSize:22,color:'var(--acid)',letterSpacing:'2px'}}>ZERO VULNERABILITIES</div>
+                <div style={{fontSize:10,color:'var(--text2)',marginTop:4,fontFamily:'var(--fn)'}}>THIS C++ APPLICATION IS CLEAN</div>
+              </div>
+            ):SEV_ORDER.filter(s=>sevCounts[s]).map(s=>(
+              <div className="sev-row" key={s} onClick={()=>setFlt(s===flt?'All':s)} style={{cursor:'pointer'}}>
+                <div className="sev-lbl" style={{color:SEV_COLORS[s]}}>{s}</div>
+                <div className="sev-bar-w">
+                  <div className="sev-bar" style={{width:`${(sevCounts[s]||0)/maxC*100}%`,background:SEV_COLORS[s]}}>
+                    <span className="sev-bar-n">{sevCounts[s]}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Meta */}
+        <div className="card">
+          <div className="card-hd"><div className="card-t"><span className="card-t-icon">🗃️</span>SCAN METADATA</div></div>
+          <div className="card-body">
+            <table className="tbl">
+              <tbody>
+                {[
+                  ['Total Findings',total],
+                  ['Scanner',data?.descriptor?.name||'Grype'],
+                  ['Version',data?.descriptor?.version||'—'],
+                  ['DB Schema',data?.descriptor?.db?.schemaVersion||'—'],
+                  ['DB Built',data?.descriptor?.db?.built?.slice(0,10)||'—'],
+                  ['Scan Date',fDate(data?.descriptor?.timestamp)],
+                  ['Active Filter',flt],
+                  ['Showing',filtered.length],
+                ].map(([k,v])=>(
+                  <tr key={k}>
+                    <td style={{color:'var(--text2)',fontSize:10,fontFamily:'var(--fn)',width:130}}>{k}</td>
+                    <td style={{fontFamily:'var(--fn)',fontSize:11,color:'var(--acid)'}}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="card fi3">
+        <div className="card-body">
+          <div style={{display:'flex',gap:10,marginBottom:12,flexWrap:'wrap',alignItems:'center'}}>
+            <input style={{flex:1}} value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Search CVE ID or component..."/>
+            <select style={{width:160}} value={flt} onChange={e=>setFlt(e.target.value)}>
+              <option value="All">All Severities ({total})</option>
+              {SEV_ORDER.map(s=><option key={s} value={s}>{s} ({sevCounts[s]||0})</option>)}
+            </select>
+            <span style={{fontSize:9,color:'var(--text2)'}}>{filtered.length} RESULTS</span>
+          </div>
+          {filtered.length===0?(
+            <div style={{textAlign:'center',padding:'32px 0'}}>
+              <div style={{fontFamily:'var(--vt)',fontSize:20,color:'var(--acid)',letterSpacing:'2px'}}>
+                {total===0?'✓ SYSTEM SECURE — NO CVEs DETECTED':'NO MATCHES FOR CURRENT FILTER'}
+              </div>
+            </div>
+          ):(
+            <table className="tbl">
+              <thead><tr>
+                <th>CVE ID</th><th>SEVERITY</th><th>COMPONENT</th><th>VERSION</th><th>FIX</th><th>NVD</th>
+              </tr></thead>
+              <tbody>
+                {filtered.map((m,i)=>{
+                  const v=m.vulnerability||{},a=m.artifact||{};
+                  const sev=v.severity||'Unknown';const cve=v.id||'';
+                  return(
+                    <tr key={i}>
+                      <td className="mono" style={{fontSize:11,color:'var(--acid)'}}>{cve}</td>
+                      <td><span className="badge" style={{background:`${SEV_COLORS[sev]}18`,color:SEV_COLORS[sev],border:`1px solid ${SEV_COLORS[sev]}30`}}>{sev}</span></td>
+                      <td className="mono" style={{fontSize:11}}>{a.name||'—'}</td>
+                      <td className="mono" style={{fontSize:10,color:'var(--text2)'}}>{a.version||'—'}</td>
+                      <td className="mono" style={{fontSize:10,color:'var(--acid)'}}>{v.fix?.versions?.[0]||'—'}</td>
+                      <td>{cve.startsWith('CVE')&&<a href={`https://nvd.nist.gov/vuln/detail/${cve}`} target="_blank" rel="noreferrer" style={{color:'var(--teal)',fontSize:10,fontFamily:'var(--fn)'}}>↗ NVD</a>}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PKI PAGE
+═══════════════════════════════════════════════════════════ */
+function PKIPage(){
+  const cmds=[
+    {label:'GENERATE RSA-4096',cmd:'openssl genrsa -out keys/signing/sbom-rsa-signing.key 4096'},
+    {label:'CONVERT PKCS#8 → PKCS#1',cmd:'openssl rsa -in keys/signing/sbom-rsa-signing.key -out keys/signing/sbom-rsa-signing-pkcs1.key'},
+    {label:'EXPORT PUBLIC KEY',cmd:'openssl rsa -in keys/signing/sbom-rsa-signing.key -pubout -out keys/public/sbom-rsa-public.pem'},
+    {label:'SIGN SBOM (XML)',cmd:'cyclonedx sign bom sbom/holistic-sbom-signed.xml --key-file keys/signing/sbom-rsa-signing-pkcs1.key'},
+    {label:'VERIFY SIGNATURE',cmd:'cyclonedx verify all sbom/holistic-sbom-signed.xml --key-file keys/public/sbom-rsa-public.pem'},
+    {label:'CONVERT JSON → XML',cmd:'cyclonedx convert --input-file sbom/holistic-sbom.json --input-format json --output-file sbom/holistic-sbom.xml --output-format xml'},
+  ];
+
+  return(
+    <div className="page">
+      <div className="phd fi1"><div><div className="pt">PKI INFRASTRUCTURE</div><div className="ps">RSA-4096 · EC P-384 · CNSA 1.0 · CYCLONEDX XML SIGNING</div></div></div>
+
+      <div className="split fi2">
+        {/* Key chain */}
+        <div className="card">
+          <div className="card-hd"><div className="card-t"><span className="card-t-icon">🔐</span>TRUST CHAIN</div></div>
+          <div className="card-body">
+            <div className="pki-chain">
+              {[
+                {icon:'🏛️',name:'ROOT CA CERTIFICATE',detail:'EC P-384 · Self-signed · 10 years · ca-root.crt',badge:'ANCHOR',bc:'var(--acid)',committed:false},
+                {icon:'📜',name:'SIGNING CERTIFICATE',detail:'RSA-4096 · 1 year · Issued by Root CA · sbom-signing.crt',badge:'SIGNING',bc:'#aa88ff',committed:false},
+                {icon:'🔑',name:'PRIVATE KEY (PKCS#1)',detail:'sbom-rsa-signing-pkcs1.key · GitLab CI: $SBOM_SIGNING_KEY',badge:'PROTECTED',bc:'var(--amber)',committed:false},
+                {icon:'🔓',name:'PUBLIC KEY',detail:'keys/public/sbom-rsa-public.pem · Committed to repository',badge:'PUBLIC',bc:'var(--teal)',committed:true},
+              ].map((n,i,arr)=>(
+                <React.Fragment key={i}>
+                  <div className="pki-node">
+                    <div style={{fontSize:22,width:36,textAlign:'center'}}>{n.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontFamily:'var(--fd)',fontSize:12,fontWeight:700,color:'var(--text)'}}>{n.name}</div>
+                      <div style={{fontFamily:'var(--fn)',fontSize:9,color:'var(--text2)',marginTop:2}}>{n.detail}</div>
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4}}>
+                      <span style={{fontSize:8,padding:'2px 7px',background:`${n.bc}15`,color:n.bc,border:`1px solid ${n.bc}30`,borderRadius:'3px',fontFamily:'var(--fn)',letterSpacing:'1px'}}>{n.badge}</span>
+                      <span style={{fontSize:8,color:n.committed?'var(--acid)':'var(--red)',fontFamily:'var(--fn)'}}>{n.committed?'✓ COMMITTED':'🔒 NEVER COMMIT'}</span>
+                    </div>
+                  </div>
+                  {i<arr.length-1&&<div className="pki-conn"/>}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Spec table */}
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div className="card">
+            <div className="card-hd"><div className="card-t"><span className="card-t-icon">⚙️</span>ALGORITHM SPECS</div></div>
+            <table className="tbl">
+              <tbody>
+                {[
+                  ['Root CA Algorithm','EC P-384'],['Signing Algorithm','RSA-4096'],
+                  ['Hash','SHA-384 / SHA-256'],['Compliance','CNSA 1.0'],
+                  ['SBOM Format','CycloneDX XML 1.4'],['CLI Tool','CycloneDX-CLI v0.30.0'],
+                  ['Key Format','PKCS#1 PEM'],['Sig Location','Embedded in XML'],
+                ].map(([k,v])=>(
+                  <tr key={k}>
+                    <td style={{color:'var(--text2)',fontSize:10,width:180,fontFamily:'var(--fn)'}}>{k}</td>
+                    <td style={{fontFamily:'var(--fn)',fontSize:11,color:'var(--acid)'}}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Signing flow */}
+          <div className="card">
+            <div className="card-hd"><div className="card-t"><span className="card-t-icon">⟳</span>SIGNING WORKFLOW</div></div>
+            <div className="card-body">
+              {['GENERATE','VALIDATE','CONVERT','SIGN','VERIFY'].map((s,i)=>(
+                <div key={s} style={{display:'flex',alignItems:'center',gap:10,marginBottom:i<4?8:0}}>
+                  <div style={{width:20,height:20,borderRadius:'50%',background:'var(--acid)',
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    fontFamily:'var(--fn)',fontSize:9,color:'#000',fontWeight:700,flexShrink:0}}>
+                    {i+1}
+                  </div>
+                  <div style={{flex:1,height:1,background:'linear-gradient(90deg,var(--acid),transparent)',opacity:.3}}/>
+                  <div style={{fontFamily:'var(--fn)',fontSize:10,color:'var(--acid)',minWidth:70,textAlign:'right'}}>{s}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Commands */}
+      <div className="card fi3">
+        <div className="card-hd"><div className="card-t"><span className="card-t-icon">💻</span>COMMANDS REFERENCE</div></div>
+        <div className="card-body">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            {cmds.map(({label,cmd})=>(
+              <div key={label} style={{background:'var(--bg3)',border:'1px solid var(--border2)',borderRadius:'var(--r)',padding:'10px 12px'}}>
+                <div style={{fontSize:8,color:'var(--text2)',letterSpacing:'2px',marginBottom:6,textTransform:'uppercase'}}>{label}</div>
+                <div style={{fontFamily:'var(--vt)',fontSize:13,color:'var(--acid)',marginBottom:8,lineHeight:1.4,wordBreak:'break-all'}}>{cmd}</div>
+                <CopyBtn text={cmd}/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS OVERLAY
+═══════════════════════════════════════════════════════════ */
+function KbdOverlay({onClose}){
+  return(
+    <div className="kbd-overlay" onClick={onClose}>
+      <div className="kbd-modal" onClick={e=>e.stopPropagation()}>
+        <div className="kbd-title">KEYBOARD SHORTCUTS</div>
+        {[
+          ['D','Dashboard'],['P','Pipelines'],['S','SBOM Viewer'],
+          ['V','Vulnerabilities'],['K','PKI / Signing'],['?','This Panel'],['Esc','Close Panel'],
+        ].map(([k,d])=>(
+          <div className="kbd-row" key={k}>
+            <span className="kbd-key">{k}</span>
+            <span className="kbd-desc">{d}</span>
+          </div>
+        ))}
+        <button className="btn btn-acid" style={{width:'100%',justifyContent:'center',marginTop:14}} onClick={onClose}>
+          CLOSE [ESC]
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST CONTAINER
+═══════════════════════════════════════════════════════════ */
+function ToastContainer({toasts}){
+  return(
+    <div className="toast-wrap">
+      {toasts.map(t=>(
+        <div key={t.id} className={`toast ${t.type}`}>
+          <span>{t.type==='ok'?'✅':t.type==='er'?'⚠':' ℹ'}</span>
+          <span style={{flex:1,color:'var(--text)'}}>{t.msg}</span>
         </div>
       ))}
     </div>
   );
 }
 
-// ── Pipeline detail ─────────────────────────────────────────────────────────
-function PipelineDetail({ config, pipeline, onBack }) {
-  const [jobs, setJobs]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [log, setLog]     = useState(null);
-  const [logJob, setLogJob] = useState(null);
+/* ═══════════════════════════════════════════════════════════
+   ROOT APP
+═══════════════════════════════════════════════════════════ */
+const NAV=[
+  {id:'dashboard',icon:'🌐',label:'OVERVIEW',key:'d'},
+  {id:'pipelines',icon:'⚡',label:'PIPELINES',key:'p'},
+  {id:'sbom',icon:'📦',label:'SBOM VIEWER',key:'s'},
+  {id:'vulns',icon:'🔍',label:'VULNERABILITIES',key:'v'},
+  {id:'pki',icon:'🔐',label:'PKI / SIGNING',key:'k'},
+];
 
-  useEffect(() => {
-    api(config.token, config.projectId, `/pipelines/${pipeline.id}/jobs`)
-      .then(setJobs).catch(console.error).finally(() => setLoading(false));
-  }, [pipeline.id]);
+function App(){
+  const[booted,setBooted]=useState(false);
+  const[expanded,setExpanded]=useState(false);
+  const[config,setConfig]=useState(()=>{try{return JSON.parse(sessionStorage.getItem('sbom_mc')||'null');}catch{return null;}});
+  const[nav,setNav]=useState('dashboard');
+  const[showKbd,setShowKbd]=useState(false);
+  const{toasts}=useToastSystem();
 
-  async function viewLog(job) {
-    setLogJob(job.name); setLog('Loading...');
-    try {
-      const res = await fetch(
-        `https://gitlab.com/api/v4/projects/${encodeURIComponent(config.projectId)}/jobs/${job.id}/trace`,
-        { headers: { 'PRIVATE-TOKEN': config.token } }
-      );
-      const text = await res.text();
-      setLog(text.slice(-4000));
-    } catch(e) { setLog(`Error: ${e}`); }
-  }
-
-  async function downloadArtifacts(job) {
-    window.open(
-      `https://gitlab.com/api/v4/projects/${encodeURIComponent(config.projectId)}/jobs/${job.id}/artifacts`,
-      '_blank'
-    );
-  }
-
-  return (
-    <div className="card">
-      <h2 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        Pipeline #{pipeline.id} — <StatusBadge status={pipeline.status} />
-        <button className="btn btn-primary btn-sm" onClick={onBack}>← Back</button>
-      </h2>
-      <div style={{fontSize:'0.85rem',color:'var(--gray)',marginBottom:16}}>
-        Branch: <strong>{pipeline.ref}</strong> &nbsp;|&nbsp;
-        Commit: <strong>{pipeline.sha?.substring(0,8)}</strong> &nbsp;|&nbsp;
-        {new Date(pipeline.created_at).toLocaleString()}
-      </div>
-      {loading ? <div className="spinner"/> :
-        <table>
-          <thead><tr><th>Job</th><th>Stage</th><th>Status</th><th>Duration</th><th>Actions</th></tr></thead>
-          <tbody>
-            {jobs.map(j => (
-              <tr key={j.id}>
-                <td><strong>{j.name}</strong></td>
-                <td>{j.stage}</td>
-                <td><StatusBadge status={j.status}/></td>
-                <td>{j.duration ? `${Math.round(j.duration)}s` : '—'}</td>
-                <td style={{display:'flex',gap:6}}>
-                  <button className="btn btn-primary btn-sm" onClick={() => viewLog(j)}>Log</button>
-                  {j.artifacts_file &&
-                    <button className="btn btn-success btn-sm" onClick={() => downloadArtifacts(j)}>⬇ Artifacts</button>
-                  }
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      }
-      {log && (
-        <div style={{marginTop:16}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-            <strong style={{fontSize:'0.9rem'}}>Log: {logJob}</strong>
-            <button className="btn btn-danger btn-sm" onClick={() => setLog(null)}>✕ Close</button>
-          </div>
-          <div className="log-box">{log}</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── SBOM Viewer ─────────────────────────────────────────────────────────────
-function SBOMViewer() {
-  const [file, setFile]     = useState(null);
-  const [sbom, setSbom]     = useState(null);
-  const [search, setSearch] = useState('');
-  const [error, setError]   = useState(null);
-
-  function loadFile(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    setFile(f.name);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        setSbom(JSON.parse(ev.target.result));
-        setError(null);
-      } catch { setError('Invalid JSON file. Please upload the holistic-sbom.json artifact.'); }
+  /* Keyboard shortcuts */
+  useEffect(()=>{
+    const h=e=>{
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+      const n=NAV.find(x=>x.key===e.key.toLowerCase());
+      if(n){setNav(n.id);return;}
+      if(e.key==='?')setShowKbd(v=>!v);
+      if(e.key==='Escape')setShowKbd(false);
     };
-    reader.readAsText(f);
+    window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h);
+  },[]);
+
+  function connect(cfg){
+    sessionStorage.setItem('sbom_mc',JSON.stringify(cfg));
+    setConfig(cfg);toast('SECURE CHANNEL ESTABLISHED','ok');
+  }
+  function disconnect(){
+    sessionStorage.removeItem('sbom_mc');setConfig(null);setNav('dashboard');
+    toast('CHANNEL CLOSED','inf');
   }
 
-  const components = sbom?.components || [];
-  const filtered   = components.filter(c =>
-    !search || c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.version?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div className="card">
-      <h2>📦 SBOM Component Viewer</h2>
-      <div className="alert alert-info" style={{marginBottom:12}}>
-        Upload <code>holistic-sbom.json</code> downloaded from the pipeline artifacts.
-      </div>
-      <input type="file" accept=".json" onChange={loadFile} style={{marginBottom:10}} />
-      {error && <div className="alert alert-danger">{error}</div>}
-      {sbom && (
-        <>
-          <div className="row" style={{marginBottom:12}}>
-            <div className="stat-box"><div className="num">{components.length}</div><div className="lbl">Components</div></div>
-            <div className="stat-box"><div className="num">{sbom.specVersion}</div><div className="lbl">CycloneDX Version</div></div>
-            <div className="stat-box" style={{flex:2}}>
-              <div style={{fontSize:'0.78rem',wordBreak:'break-all',color:'var(--gray)'}}>{sbom.serialNumber}</div>
-              <div className="lbl">Serial Number</div>
-            </div>
-          </div>
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search components..." style={{marginBottom:10}} />
-          <table>
-            <thead><tr><th>Name</th><th>Version</th><th>Type</th><th>Supplier</th><th>License</th></tr></thead>
-            <tbody>
-              {filtered.map((c, i) => (
-                <tr key={i}>
-                  <td><strong>{c.name}</strong></td>
-                  <td>{c.version || '—'}</td>
-                  <td>{c.type || '—'}</td>
-                  <td>{c.supplier?.name || '—'}</td>
-                  <td>{c.licenses?.[0]?.license?.id || c.licenses?.[0]?.expression || '—'}</td>
-                </tr>
-              ))}
-              {filtered.length === 0 && <tr><td colSpan={5} style={{color:'var(--gray)',textAlign:'center'}}>No components match.</td></tr>}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ── Vulnerability Viewer ─────────────────────────────────────────────────────
-function VulnViewer() {
-  const [data, setData]     = useState(null);
-  const [filter, setFilter] = useState('All');
-  const [search, setSearch] = useState('');
-  const [error, setError]   = useState(null);
-
-  function loadFile(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        setData(JSON.parse(ev.target.result));
-        setError(null);
-      } catch { setError('Invalid JSON. Upload vuln-report.json from pipeline artifacts.'); }
-    };
-    reader.readAsText(f);
-  }
-
-  const matches = data?.matches || [];
-  const sevCounts = matches.reduce((acc, m) => {
-    const s = m.vulnerability?.severity || 'Unknown';
-    acc[s] = (acc[s] || 0) + 1;
-    return acc;
-  }, {});
-  const maxCount = Math.max(...Object.values(sevCounts), 1);
-  const sevOrder = ['Critical','High','Medium','Low','Negligible','Unknown'];
-  const sevColors = {Critical:'#ff4d4d',High:'#ff9900',Medium:'#ffd700',Low:'#90ee90',Negligible:'#ddd',Unknown:'#ccc'};
-
-  const filtered = matches.filter(m => {
-    const sev = m.vulnerability?.severity || 'Unknown';
-    const name = m.artifact?.name || '';
-    const id   = m.vulnerability?.id || '';
-    return (filter === 'All' || sev === filter) &&
-      (!search || name.toLowerCase().includes(search.toLowerCase()) || id.toLowerCase().includes(search.toLowerCase()));
-  });
-
-  return (
-    <div className="card">
-      <h2>🔍 Vulnerability Report Viewer</h2>
-      <div className="alert alert-info" style={{marginBottom:12}}>
-        Upload <code>vuln-report.json</code> downloaded from the pipeline artifacts.
-      </div>
-      <input type="file" accept=".json" onChange={loadFile} style={{marginBottom:10}} />
-      {error && <div className="alert alert-danger">{error}</div>}
-      {data && (
-        <>
-          <div style={{marginBottom:16}}>
-            <div style={{marginBottom:8,fontWeight:'bold',fontSize:'0.9rem',color:'var(--navy)'}}>
-              Severity Distribution ({matches.length} total findings)
-            </div>
-            {sevOrder.filter(s => sevCounts[s]).map(s => (
-              <div key={s} style={{marginBottom:6}}>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.82rem'}}>
-                  <span style={{fontWeight:'bold'}}>{s}</span>
-                  <span>{sevCounts[s] || 0}</span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill"
-                    style={{width:`${((sevCounts[s]||0)/maxCount)*100}%`, background: sevColors[s]}} />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="row" style={{marginBottom:12}}>
-            <div style={{flex:2}}>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search CVE or component..." />
-            </div>
-            <div style={{flex:1}}>
-              <select value={filter} onChange={e => setFilter(e.target.value)}>
-                <option value="All">All Severities</option>
-                {sevOrder.map(s => <option key={s} value={s}>{s} ({sevCounts[s]||0})</option>)}
-              </select>
-            </div>
-          </div>
-          <table>
-            <thead><tr><th>CVE ID</th><th>Severity</th><th>Component</th><th>Version</th><th>Fixed In</th></tr></thead>
-            <tbody>
-              {filtered.map((m,i) => {
-                const v = m.vulnerability || {};
-                const a = m.artifact || {};
-                const cveId = v.id || '';
-                const nvdUrl = cveId.startsWith('CVE') ? `https://nvd.nist.gov/vuln/detail/${cveId}` : null;
-                return (
-                  <tr key={i}>
-                    <td>{nvdUrl ? <a href={nvdUrl} target="_blank">{cveId}</a> : cveId}</td>
-                    <td><SevBadge sev={v.severity || 'Unknown'} /></td>
-                    <td>{a.name || '—'}</td>
-                    <td>{a.version || '—'}</td>
-                    <td>{v.fix?.versions?.[0] || '—'}</td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 &&
-                <tr><td colSpan={5} style={{textAlign:'center',color:'var(--gray)'}}>
-                  {matches.length === 0 ? '✅ No vulnerabilities found!' : 'No matches for current filter.'}
-                </td></tr>}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ── PKI Info ─────────────────────────────────────────────────────────────────
-function PKIInfo() {
-  return (
-    <div className="card">
-      <h2>🔐 PKI / Signing Info</h2>
-      <table>
-        <tbody>
-          <tr><td><strong>Algorithm</strong></td><td>RSA-4096 (CNSA 1.0)</td></tr>
-          <tr><td><strong>CA Certificate</strong></td><td>keys/ca/ca-root.crt (self-signed, 10yr)</td></tr>
-          <tr><td><strong>Signing Certificate</strong></td><td>keys/signing/sbom-signing.crt (1yr)</td></tr>
-          <tr><td><strong>Public Key</strong></td><td>keys/public/sbom-rsa-public.pem (committed to repo)</td></tr>
-          <tr><td><strong>Private Key</strong></td><td>GitLab CI variable SBOM_SIGNING_KEY (Protected, never committed)</td></tr>
-          <tr><td><strong>SBOM Format Signed</strong></td><td>CycloneDX XML (v1.4)</td></tr>
-          <tr><td><strong>Tool</strong></td><td>CycloneDX-CLI v0.30.0</td></tr>
-        </tbody>
-      </table>
-      <div className="alert alert-info" style={{marginTop:16}}>
-        To verify a signed SBOM locally:<br/>
-        <code>cyclonedx verify all sbom/holistic-sbom-signed.xml --key-file keys/public/sbom-rsa-public.pem</code>
-      </div>
-    </div>
-  );
-}
-
-// ── Main App ─────────────────────────────────────────────────────────────────
-function App() {
-  const [config, setConfig]           = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem('sbom_config') || '{}'); } catch { return {}; }
-  });
-  const [connected, setConnected]     = useState(false);
-  const [tab, setTab]                 = useState('pipelines');
-  const [refresh, setRefresh]         = useState(0);
-  const [selectedPipeline, setSelected] = useState(null);
-  const [pipelines, setPipelines]     = useState([]);
-  const [vulns, setVulns]             = useState([]);
-  const [error, setError]             = useState(null);
-
-  function saveConfig(cfg) {
-    sessionStorage.setItem('sbom_config', JSON.stringify(cfg));
-    setConfig(cfg);
-    setError(null);
-    testConnection(cfg);
-  }
-
-  async function testConnection(cfg) {
-    try {
-      const data = await api(cfg.token, cfg.projectId, '/pipelines?per_page=20');
-      setPipelines(data);
-      setConnected(true);
-    } catch(e) {
-      setError(`Connection failed: ${e}`);
-      setConnected(false);
-    }
-  }
-
-  useEffect(() => {
-    if (config.token && config.projectId) testConnection(config);
-  }, []);
-
-  const tabs = [
-    { id: 'pipelines',  label: '📋 Pipelines' },
-    { id: 'sbom',       label: '📦 SBOM Viewer' },
-    { id: 'vulns',      label: '🔍 Vulnerabilities' },
-    { id: 'pki',        label: '🔐 PKI Info' },
-  ];
-
-  return (
+  return(
     <>
-      <header>
-        <div>
-          <h1>SBOM Attestation Dashboard</h1>
-          <span>University Management System — Lockheed Martin Senior Design</span>
+      {!booted&&<BootScreen onDone={()=>setBooted(true)}/>}
+      {booted&&!config&&<ConnectModal onConnect={connect}/>}
+      {showKbd&&<KbdOverlay onClose={()=>setShowKbd(false)}/>}
+      <ToastContainer toasts={toasts}/>
+
+      <header className="hdr">
+        <div className="hdr-brand">
+          <div className="hdr-sigil">SB</div>
+          <div>
+            <div className="hdr-title">SBOM ATTESTATION</div>
+            <div className="hdr-sub">CLASSIFIED OPS · LOCKHEED MARTIN · UNIVERSITY MANAGEMENT SYSTEM</div>
+          </div>
         </div>
-        <div style={{textAlign:'right',fontSize:'0.82rem'}}>
-          {connected
-            ? <span style={{color:'#90ee90'}}>● Connected to {config.projectId}</span>
-            : <span style={{color:'#ffcc00'}}>○ Not connected</span>}
+        <div className="hdr-right">
+          <button className="btn btn-xs" onClick={()=>setShowKbd(true)} title="Keyboard Shortcuts [?]">
+            ⌨ SHORTCUTS
+          </button>
+          <Clock/>
+          <div className="hdr-conn">
+            <div className={`conn-led${config?' on':' off'}`}/>
+            <span style={{color:'var(--text2)',fontSize:9,letterSpacing:'1px'}}>
+              {config?config.projectId.split('/')[1]?.toUpperCase()||'CONNECTED':'OFFLINE'}
+            </span>
+          </div>
         </div>
       </header>
 
-      <div className="container">
-        {error && <div className="alert alert-danger">{error}</div>}
-
-        <ConfigPanel config={config} onSave={saveConfig} />
-
-        {connected && (
-          <>
-            <StatsRow pipelines={pipelines} vulns={vulns} />
-            <div className="tabs">
-              {tabs.map(t => (
-                <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`}
-                  onClick={() => { setTab(t.id); setSelected(null); }}>
-                  {t.label}
+      <div className="layout">
+        <nav className={`sbar${expanded?' expanded':''}`}>
+          <button className="sbar-toggle" onClick={()=>setExpanded(!expanded)}>
+            {expanded?'◀':'▶'}
+          </button>
+          {expanded?(
+            <>
+              <div className="sbar-label">NAVIGATION</div>
+              {NAV.map(n=>(
+                <div key={n.id} className={`nav-row${nav===n.id?' active':''}`} onClick={()=>setNav(n.id)}>
+                  <span className="nav-icon">{n.icon}</span>
+                  {n.label}
+                  <span className="kbd-hint">{n.key.toUpperCase()}</span>
+                </div>
+              ))}
+              <div className="sbar-footer">
+                {config&&<div style={{marginBottom:8}}>
+                  <div style={{fontSize:8,color:'var(--text3)',letterSpacing:'1px',marginBottom:4}}>CONNECTED TO</div>
+                  <div style={{fontSize:9,color:'var(--acid)',fontFamily:'var(--fn)',wordBreak:'break-all'}}>{config.projectId}</div>
+                </div>}
+                {config&&<button className="btn btn-xs btn-red" style={{width:'100%',justifyContent:'center'}} onClick={disconnect}>⏏ DISCONNECT</button>}
+                <div style={{fontSize:8,color:'var(--text3)',letterSpacing:'1px',marginTop:10}}>
+                  PIPELINE #2360731208 ✅<br/>
+                  SBOM ATTESTATION v1.0
+                </div>
+              </div>
+            </>
+          ):(
+            <>
+              {NAV.map(n=>(
+                <button key={n.id} className={`nav-i${nav===n.id?' active':''}`}
+                  title={`${n.label} [${n.key.toUpperCase()}]`} onClick={()=>setNav(n.id)}>
+                  {n.icon}
                 </button>
               ))}
-            </div>
+              <div className="sbar-footer-mini">◈</div>
+            </>
+          )}
+        </nav>
 
-            {tab === 'pipelines' && !selectedPipeline && (
-              <>
-                <TriggerPanel config={config} onTriggered={() => setRefresh(r => r+1)} />
-                <PipelineList config={config} refresh={refresh}
-                  onSelect={setSelected} />
-              </>
-            )}
-            {tab === 'pipelines' && selectedPipeline && (
-              <PipelineDetail config={config} pipeline={selectedPipeline}
-                onBack={() => setSelected(null)} />
-            )}
-            {tab === 'sbom'  && <SBOMViewer />}
-            {tab === 'vulns' && <VulnViewer />}
-            {tab === 'pki'   && <PKIInfo />}
-          </>
-        )}
+        <main className="main">
+          {nav==='dashboard'&&<Dashboard config={config||{}} setNav={setNav}/>}
+          {nav==='pipelines'&&(config?<PipelinesPage config={config}/>:<NoConn/>)}
+          {nav==='sbom'&&<SBOMPage/>}
+          {nav==='vulns'&&<VulnPage/>}
+          {nav==='pki'&&<PKIPage/>}
+        </main>
       </div>
-      <footer>SBOM Attestation Dashboard · Lockheed Martin Senior Design · bambelino85</footer>
     </>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+function NoConn(){
+  return(
+    <div className="page" style={{alignItems:'center',justifyContent:'center',minHeight:'60vh'}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{fontFamily:'var(--vt)',fontSize:32,color:'var(--text3)',letterSpacing:'4px',marginBottom:12}}>NO SIGNAL</div>
+        <div style={{fontSize:10,color:'var(--text3)',letterSpacing:'2px'}}>CONNECT VIA THE TOP-RIGHT PANEL TO ACCESS LIVE DATA</div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
