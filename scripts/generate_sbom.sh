@@ -5,7 +5,7 @@ SBOM_DIR=./sbom
 mkdir -p $SBOM_DIR
 
 echo "[1/4] Generating SBOM from filesystem (Syft)..."
-syft dir:. --output cyclonedx-json=$SBOM_DIR/syft-cots.json
+syft dir:. --output cyclonedx-json@1.4=$SBOM_DIR/syft-cots.json
 
 echo "[2/4] Generating SBOM from OS packages (Trivy)..."
 trivy filesystem --format cyclonedx --output $SBOM_DIR/trivy-os.json .
@@ -23,3 +23,15 @@ cyclonedx merge \
   --output-format json
 
 echo "[DONE] SBOM generation complete: $SBOM_DIR/holistic-sbom.json"
+
+echo "[5/4] Patching specVersion to 1.4 for tool compatibility..."
+python3 -c "
+import json
+with open('$SBOM_DIR/holistic-sbom.json') as f:
+    d = json.load(f)
+d['specVersion'] = '1.4'
+d.pop('annotations', None)
+with open('$SBOM_DIR/holistic-sbom.json', 'w') as f:
+    json.dump(d, f, indent=2)
+print('[patch] specVersion set to 1.4')
+"
