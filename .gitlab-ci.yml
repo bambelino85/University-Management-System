@@ -2,8 +2,6 @@ image: bambelino85/ums-sbom-builder:latest
 
 variables:
   APP_VERSION: "1.0.0"
-  SBOM_DIR: "./sbom"
-  REPORT_DIR: "./reports"
 
 stages:
   - build
@@ -12,127 +10,69 @@ stages:
   - sbom_scan
   - report
 
-# --------------------------------------------------------
-# STAGE 1: BUILD
-# --------------------------------------------------------
 build:cpp:
   stage: build
   script:
-    - echo "[Build] Compiling University Management System..."
+    - echo "[Build] Compiling..."
     - make clean && make
-    - echo "[Build] Binary size $(ls -lh university_app | awk '{print $5}')"
-    - ./university_app <<< "3"
+    - echo "3" | ./university_app
     - echo "[Build] Smoke test passed"
   artifacts:
     paths:
       - university_app
     expire_in: 1 hour
 
-# --------------------------------------------------------
-# STAGE 2: SBOM GENERATION
-# --------------------------------------------------------
 sbom:generate:
   stage: sbom_generate
   needs: [build:cpp]
   script:
     - mkdir -p sbom reports
-    - echo "[SBOM] Generating custom component SBOM..."
-    - CI_APP_VERSION=$APP_VERSION python3 scripts/csv_to_sbom.py
-        --input sbom-components.csv
-        --output sbom/custom-components.json
-        --version $APP_VERSION
-    - echo "[SBOM] Running Syft filesystem scan..."
+    - python3 scripts/csv_to_sbom.py --input sbom-components.csv --output sbom/custom-components.json --version $APP_VERSION
     - syft dir:. --output cyclonedx-json@1.4=sbom/syft-cots.json
-    - echo "[SBOM] Running Trivy filesystem scan..."
     - trivy filesystem --format cyclonedx --output sbom/trivy-os.json .
-    - echo "[SBOM] Merging all SBOMs..."
-    - cyclonedx merge
-        --input-files sbom/syft-cots.json sbom/trivy-os.json sbom/custom-components.json
-        --output-file sbom/holistic-sbom.json
-        --output-format json
-    - echo "[SBOM] Patching specVersion to 1.4..."
-    - python3 -c "
-        import json;
-        d=json.load(open('sbom/holistic-sbom.json'));
-        d['specVersion']='1.4';
-        d.pop('annotations',None);
-        json.dump(d,open('sbom/holistic-sbom.json','w'),indent=2);
-        print('[patch] specVersion set to 1.4')"
-    - echo "[SBOM] Validating schema..."
+    - cyclonedx merge --input-files sbom/syft-cots.json sbom/trivy-os.json sbom/custom-components.json --output-file sbom/holistic-sbom.json --output-format json
+    - python3 scripts/patch_sbom_version.py sbom/holistic-sbom.json
     - cyclonedx validate --input-file sbom/holistic-sbom.json --input-format json --input-version v1_4
-    - echo "[SBOM] Generation complete"
+    - echo "[SBOM] Generation and validation complete"
   artifacts:
     paths:
       - sbom/
     expire_in: 1 week
 
-# --------------------------------------------------------
-# STAGE 3: SBOM SIGNING
-# --------------------------------------------------------
 sbom:sign:
   stage: sbom_sign
   needs: [sbom:generate]
   script:
-    - echo "[Sign] Converting SBOM to XML..."
-    - cyclonedx convert
-        --input-file sbom/holistic-sbom.json
-        --input-format json
-        --output-file sbom/holistic-sbom.xml
-        --output-format xml
-    - echo "[Sign] Signing with RSA-4096 key..."
+    - cyclonedx convert --input-file sbom/holistic-sbom.json --input-format json --output-file sbom/holistic-sbom.xml --output-format xml
     - cp sbom/holistic-sbom.xml sbom/holistic-sbom-signed.xml
-    - cyclonedx sign bom sbom/holistic-sbom-signed.xml
-        --key-file $SBOM_SIGNING_KEY
-    - echo "[Sign] Verifying signature..."
-    - cyclonedx verify all sbom/holistic-sbom-signed.xml
-        --key-file keys/public/sbom-rsa-public.pem
+    - cyclonedx sign bom sbom/holistic-sbom-signed.xml --key-file $SBOM_SIGNING_KEY
+    - cyclonedx verify all sbom/holistic-sbom-signed.xml --key-file keys/public/sbom-rsa-public.pem
     - echo "[Sign] SBOM signed and verified"
   artifacts:
     paths:
-      - sbom/holistic-sbom-signed.xml
-      - sbom/holistic-sbom.json
+      - sbom/
     expire_in: 1 month
 
-# --------------------------------------------------------
-# STAGE 4: VULNERABILITY SCAN
-# --------------------------------------------------------
 sbom:scan:
   stage: sbom_scan
   needs: [sbom:sign]
   script:
     - mkdir -p reports
-    - echo "[Scan] Running Grype vulnerability scan..."
-    - grype sbom:sbom/holistic-sbom.json
-        --output json
-        --file reports/vuln-report.json
-    - echo "[Scan] Generating HTML report..."
-    - python3 scripts/vuln_summary.py
-        --input reports/vuln-report.json
-        --output reports/vuln-analysis-report.html
-    - echo "[Scan] Vulnerability summary:"
-    - python3 -c "
-        import json;
-        d=json.load(open('reports/vuln-report.json'));
-        m=d.get('matches',[]);
-        c={};
-        [c.update({x.get('vulnerability',{}).get('severity','Unknown'):c.get(x.get('vulnerability',{}).get('severity','Unknown'),0)+1}) for x in m];
-        print(f'Total findings: {len(m)}');
-        [print(f'  {s}: {n}') for s,n in sorted(c.items())]"
+    - grype sbom:sbom/holistic-sbom.json --output json --file reports/vuln-report.json
+    - python3 scripts/vuln_summary.py --input reports/vuln-report.json --output reports/vuln-analysis-report.html
+    - python3 scripts/vuln_print_summary.py
   artifacts:
     paths:
       - reports/
     expire_in: 1 month
   allow_failure: true
 
-# --------------------------------------------------------
-# STAGE 5: FINAL REPORT
-# --------------------------------------------------------
 report:publish:
   stage: report
   needs: [sbom:scan]
   script:
-    - echo "[Report] Pipeline complete. Artifact summary:"
-    - ls -lh university_app sbom/holistic-sbom-signed.xml sbom/holistic-sbom.json reports/vuln-analysis-report.html
+    - echo "[Report] Pipeline complete"
+    - ls -lh sbom/ reports/
   artifacts:
     name: "sbom-attestation-v${APP_VERSION}-${CI_COMMIT_SHORT_SHA}"
     paths:
