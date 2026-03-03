@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SBOM Attestation Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --navy: #1F4E79; --blue: #2E75B6; --light: #EBF3FB;
+      --green: #28a745; --red: #dc3545; --orange: #fd7e14;
+      --yellow: #ffc107; --gray: #6c757d; --white: #fff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; }
+    header {
+      background: var(--navy); color: white; padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    header h1 { font-size: 1.4rem; letter-spacing: 0.5px; }
+    header span { font-size: 0.85rem; opacity: 0.7; }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+    .card {
+      background: white; border-radius: 8px; padding: 24px;
+      margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .card h2 { color: var(--navy); font-size: 1.1rem; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 2px solid var(--light); }
+    input, select {
+      width: 100%; padding: 9px 12px; border: 1px solid #ccc;
+      border-radius: 4px; font-size: 0.95rem; margin-bottom: 10px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--blue); }
+    .btn {
+      padding: 9px 20px; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 0.95rem; font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-success { background: var(--green); color: white; }
+    .btn-danger  { background: var(--red); color: white; }
+    .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .stat-box {
+      flex: 1; min-width: 140px; background: var(--light);
+      border-radius: 6px; padding: 16px; text-align: center;
+    }
+    .stat-box .num { font-size: 2rem; font-weight: bold; color: var(--navy); }
+    .stat-box .lbl { font-size: 0.8rem; color: var(--gray); margin-top: 4px; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 0.78rem; font-weight: bold; text-transform: uppercase;
+    }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-danger  { background: #f8d7da; color: #721c24; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-info    { background: #d1ecf1; color: #0c5460; }
+    .badge-running { background: #cce5ff; color: #004085; }
+    .badge-gray    { background: #e2e3e5; color: #383d41; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: var(--navy); color: white; padding: 8px 12px; text-align: left; }
+    td { padding: 7px 12px; border-bottom: 1px solid #eee; }
+    tr:hover td { background: var(--light); }
+    .sev-Critical { background:#ff4d4d; color:white; }
+    .sev-High     { background:#ff9900; color:white; }
+    .sev-Medium   { background:#ffd700; color:#333; }
+    .sev-Low      { background:#90ee90; color:#333; }
+    .sev-Negligible { background:#ddd; color:#333; }
+    .log-box {
+      background: #1e1e1e; color: #d4d4d4; font-family: monospace;
+      font-size: 0.78rem; padding: 12px; border-radius: 4px;
+      max-height: 260px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; font-size: 0.9rem; }
+    .alert-danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-info    { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    .pipeline-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .pipeline-row:last-child { border-bottom: none; }
+    .stage-flow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .stage-pill {
+      padding: 2px 10px; border-radius: 10px; font-size: 0.75rem;
+      background: var(--light); color: var(--navy); border: 1px solid #ccc;
+    }
+    .spinner { display: inline-block; width: 16px; height: 16px;
+      border: 2px solid #ccc; border-top-color: var(--navy);
+      border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .tabs { display: flex; gap: 2px; margin-bottom: 20px; }
+    .tab {
+      padding: 8px 20px; border: none; cursor: pointer; font-size: 0.95rem;
+      background: #e9ecef; border-radius: 4px 4px 0 0; color: #555;
+    }
+    .tab.active { background: var(--navy); color: white; }
+    .progress-bar { background: #e9ecef; border-radius: 4px; height: 8px; overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .label { font-size: 0.82rem; font-weight: bold; color: var(--gray); margin-bottom: 4px; }
+    footer { text-align: center; color: var(--gray); font-size: 0.8rem; padding: 24px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+// ── GitLab API helpers ──────────────────────────────────────────────────────
+function api(token, projectId, path, opts = {}) {
+  const base = `https://gitlab.com/api/v4/projects/${encodeURIComponent(projectId)}`;
+  return fetch(`${base}${path}`, {
+    ...opts,
+    headers: { 'PRIVATE-TOKEN': token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e.message || 'API error')));
+}
+
+// ── Status badge ────────────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const map = {
+    success: 'badge-success', failed: 'badge-danger', running: 'badge-running',
+    pending: 'badge-warning', canceled: 'badge-gray', created: 'badge-gray',
+    skipped: 'badge-gray',
+  };
+  return <span className={`badge ${map[status] || 'badge-gray'}`}>{status}</span>;
+}
+
+// ── Severity badge ──────────────────────────────────────────────────────────
+function SevBadge({ sev }) {
+  return <span className={`badge sev-${sev}`} style={{padding:'2px 8px'}}>{sev}</span>;
+}
+
+// ── Config panel ────────────────────────────────────────────────────────────
+function ConfigPanel({ config, onSave }) {
+  const [tok, setTok] = useState(config.token || '');
+  const [pid, setPid] = useState(config.projectId || '');
+  return (
+    <div className="card">
+      <h2>🔑 GitLab Connection</h2>
+      <div className="label">GitLab Project ID or namespace/path</div>
+      <input value={pid} onChange={e => setPid(e.target.value)}
+        placeholder="e.g. bambelino85/university-management-system-sbom" />
+      <div className="label">Personal Access Token (api scope)</div>
+      <input type="password" value={tok} onChange={e => setTok(e.target.value)}
+        placeholder="glpat-xxxxxxxxxxxxxxxxxxxx" />
+      <button className="btn btn-primary" onClick={() => onSave({ token: tok, projectId: pid })}>
+        Connect
+      </button>
+    </div>
+  );
+}
+
+// ── Stats row ───────────────────────────────────────────────────────────────
+function StatsRow({ pipelines, vulns }) {
+  const passed  = pipelines.filter(p => p.status === 'success').length;
+  const failed  = pipelines.filter(p => p.status === 'failed').length;
+  const running = pipelines.filter(p => p.status === 'running').length;
+  const total   = vulns.length;
+  const critical = vulns.filter(v => v.vulnerability?.severity === 'Critical').length;
+  const high     = vulns.filter(v => v.vulnerability?.severity === 'High').length;
+  return (
+    <div className="row" style={{marginBottom: 24}}>
+      <div className="stat-box"><div className="num" style={{color:'var(--green)'}}>{passed}</div><div className="lbl">Pipelines Passed</div></div>
+      <div className="stat-box"><div className="num" style={{color:'var(--red)'}}>{failed}</div><div className="lbl">Pipelines Failed</div></div>
+      <div className="stat-box"><div className="num" style={{color:'#004085'}}>{running}</div><div className="lbl">Running</div></div>
+      <div className="stat-box"><div className="num" style={{color:'var(--navy)'}}>{total}</div><div className="lbl">Total Vulns</div></div>
+      <div className="stat-box"><div className="num" style={{color:'var(--red)'}}>{critical}</div><div className="lbl">Critical</div></div>
+      <div className="stat-box"><div className="num" style={{color:'var(--orange)'}}>{high}</div><div className="lbl">High</div></div>
+    </div>
+  );
+}
+
+// ── Pipeline trigger ────────────────────────────────────────────────────────
+function TriggerPanel({ config, onTriggered }) {
+  const [ref, setRef]       = useState('main');
+  const [ver, setVer]       = useState('1.0.0');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg]       = useState(null);
+
+  async function trigger() {
+    setLoading(true); setMsg(null);
+    try {
+      const res = await api(config.token, config.projectId,
+        '/pipeline', {
+          method: 'POST',
+          body: JSON.stringify({ ref, variables: [{ key: 'APP_VERSION', value: ver }] })
+        });
+      setMsg({ type: 'success', text: `Pipeline #${res.id} triggered on "${ref}" ✅` });
+      onTriggered();
+    } catch(e) {
+      setMsg({ type: 'danger', text: `Error: ${e}` });
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="card">
+      <h2>🚀 Trigger SBOM Pipeline</h2>
+      {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
+      <div className="row">
+        <div style={{flex:1}}>
+          <div className="label">Branch / Ref</div>
+          <input value={ref} onChange={e => setRef(e.target.value)} placeholder="main" />
+        </div>
+        <div style={{flex:1}}>
+          <div className="label">App Version</div>
+          <input value={ver} onChange={e => setVer(e.target.value)} placeholder="1.0.0" />
+        </div>
+      </div>
+      <button className="btn btn-success" onClick={trigger} disabled={loading}>
+        {loading ? <><span className="spinner"/> &nbsp;Triggering...</> : '▶ Run Pipeline'}
+      </button>
+    </div>
+  );
+}
+
+// ── Pipeline list ───────────────────────────────────────────────────────────
+function PipelineList({ config, refresh, onSelect }) {
+  const [pipelines, setPipelines] = useState([]);
+  const [loading, setLoading]     = useState(false);
+
+  const load = useCallback(async () => {
+    if (!config.token) return;
+    setLoading(true);
+    try {
+      const data = await api(config.token, config.projectId, '/pipelines?per_page=10');
+      setPipelines(data);
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  }, [config]);
+
+  useEffect(() => { load(); }, [load, refresh]);
+
+  return (
+    <div className="card">
+      <h2 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        📋 Recent Pipelines
+        <button className="btn btn-primary btn-sm" onClick={load} disabled={loading}>
+          {loading ? <span className="spinner"/> : '↻ Refresh'}
+        </button>
+      </h2>
+      {pipelines.length === 0 && !loading && <p style={{color:'var(--gray)'}}>No pipelines found.</p>}
+      {pipelines.map(p => (
+        <div key={p.id} className="pipeline-row">
+          <StatusBadge status={p.status} />
+          <div style={{flex:1}}>
+            <div style={{fontSize:'0.88rem'}}>
+              <strong>#{p.id}</strong> &nbsp;
+              <span style={{color:'var(--gray)'}}>{p.ref}</span> &nbsp;
+              <span style={{color:'var(--gray)',fontSize:'0.8rem'}}>{new Date(p.created_at).toLocaleString()}</span>
+            </div>
+            <div style={{fontSize:'0.8rem',color:'var(--gray)'}}>{p.sha?.substring(0,8)}</div>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => onSelect(p)}>
+            View →
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Pipeline detail ─────────────────────────────────────────────────────────
+function PipelineDetail({ config, pipeline, onBack }) {
+  const [jobs, setJobs]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [log, setLog]     = useState(null);
+  const [logJob, setLogJob] = useState(null);
+
+  useEffect(() => {
+    api(config.token, config.projectId, `/pipelines/${pipeline.id}/jobs`)
+      .then(setJobs).catch(console.error).finally(() => setLoading(false));
+  }, [pipeline.id]);
+
+  async function viewLog(job) {
+    setLogJob(job.name); setLog('Loading...');
+    try {
+      const res = await fetch(
+        `https://gitlab.com/api/v4/projects/${encodeURIComponent(config.projectId)}/jobs/${job.id}/trace`,
+        { headers: { 'PRIVATE-TOKEN': config.token } }
+      );
+      const text = await res.text();
+      setLog(text.slice(-4000));
+    } catch(e) { setLog(`Error: ${e}`); }
+  }
+
+  async function downloadArtifacts(job) {
+    window.open(
+      `https://gitlab.com/api/v4/projects/${encodeURIComponent(config.projectId)}/jobs/${job.id}/artifacts`,
+      '_blank'
+    );
+  }
+
+  return (
+    <div className="card">
+      <h2 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        Pipeline #{pipeline.id} — <StatusBadge status={pipeline.status} />
+        <button className="btn btn-primary btn-sm" onClick={onBack}>← Back</button>
+      </h2>
+      <div style={{fontSize:'0.85rem',color:'var(--gray)',marginBottom:16}}>
+        Branch: <strong>{pipeline.ref}</strong> &nbsp;|&nbsp;
+        Commit: <strong>{pipeline.sha?.substring(0,8)}</strong> &nbsp;|&nbsp;
+        {new Date(pipeline.created_at).toLocaleString()}
+      </div>
+      {loading ? <div className="spinner"/> :
+        <table>
+          <thead><tr><th>Job</th><th>Stage</th><th>Status</th><th>Duration</th><th>Actions</th></tr></thead>
+          <tbody>
+            {jobs.map(j => (
+              <tr key={j.id}>
+                <td><strong>{j.name}</strong></td>
+                <td>{j.stage}</td>
+                <td><StatusBadge status={j.status}/></td>
+                <td>{j.duration ? `${Math.round(j.duration)}s` : '—'}</td>
+                <td style={{display:'flex',gap:6}}>
+                  <button className="btn btn-primary btn-sm" onClick={() => viewLog(j)}>Log</button>
+                  {j.artifacts_file &&
+                    <button className="btn btn-success btn-sm" onClick={() => downloadArtifacts(j)}>⬇ Artifacts</button>
+                  }
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      }
+      {log && (
+        <div style={{marginTop:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <strong style={{fontSize:'0.9rem'}}>Log: {logJob}</strong>
+            <button className="btn btn-danger btn-sm" onClick={() => setLog(null)}>✕ Close</button>
+          </div>
+          <div className="log-box">{log}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── SBOM Viewer ─────────────────────────────────────────────────────────────
+function SBOMViewer() {
+  const [file, setFile]     = useState(null);
+  const [sbom, setSbom]     = useState(null);
+  const [search, setSearch] = useState('');
+  const [error, setError]   = useState(null);
+
+  function loadFile(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    setFile(f.name);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        setSbom(JSON.parse(ev.target.result));
+        setError(null);
+      } catch { setError('Invalid JSON file. Please upload the holistic-sbom.json artifact.'); }
+    };
+    reader.readAsText(f);
+  }
+
+  const components = sbom?.components || [];
+  const filtered   = components.filter(c =>
+    !search || c.name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.version?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="card">
+      <h2>📦 SBOM Component Viewer</h2>
+      <div className="alert alert-info" style={{marginBottom:12}}>
+        Upload <code>holistic-sbom.json</code> downloaded from the pipeline artifacts.
+      </div>
+      <input type="file" accept=".json" onChange={loadFile} style={{marginBottom:10}} />
+      {error && <div className="alert alert-danger">{error}</div>}
+      {sbom && (
+        <>
+          <div className="row" style={{marginBottom:12}}>
+            <div className="stat-box"><div className="num">{components.length}</div><div className="lbl">Components</div></div>
+            <div className="stat-box"><div className="num">{sbom.specVersion}</div><div className="lbl">CycloneDX Version</div></div>
+            <div className="stat-box" style={{flex:2}}>
+              <div style={{fontSize:'0.78rem',wordBreak:'break-all',color:'var(--gray)'}}>{sbom.serialNumber}</div>
+              <div className="lbl">Serial Number</div>
+            </div>
+          </div>
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search components..." style={{marginBottom:10}} />
+          <table>
+            <thead><tr><th>Name</th><th>Version</th><th>Type</th><th>Supplier</th><th>License</th></tr></thead>
+            <tbody>
+              {filtered.map((c, i) => (
+                <tr key={i}>
+                  <td><strong>{c.name}</strong></td>
+                  <td>{c.version || '—'}</td>
+                  <td>{c.type || '—'}</td>
+                  <td>{c.supplier?.name || '—'}</td>
+                  <td>{c.licenses?.[0]?.license?.id || c.licenses?.[0]?.expression || '—'}</td>
+                </tr>
+              ))}
+              {filtered.length === 0 && <tr><td colSpan={5} style={{color:'var(--gray)',textAlign:'center'}}>No components match.</td></tr>}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Vulnerability Viewer ─────────────────────────────────────────────────────
+function VulnViewer() {
+  const [data, setData]     = useState(null);
+  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [error, setError]   = useState(null);
+
+  function loadFile(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        setData(JSON.parse(ev.target.result));
+        setError(null);
+      } catch { setError('Invalid JSON. Upload vuln-report.json from pipeline artifacts.'); }
+    };
+    reader.readAsText(f);
+  }
+
+  const matches = data?.matches || [];
+  const sevCounts = matches.reduce((acc, m) => {
+    const s = m.vulnerability?.severity || 'Unknown';
+    acc[s] = (acc[s] || 0) + 1;
+    return acc;
+  }, {});
+  const maxCount = Math.max(...Object.values(sevCounts), 1);
+  const sevOrder = ['Critical','High','Medium','Low','Negligible','Unknown'];
+  const sevColors = {Critical:'#ff4d4d',High:'#ff9900',Medium:'#ffd700',Low:'#90ee90',Negligible:'#ddd',Unknown:'#ccc'};
+
+  const filtered = matches.filter(m => {
+    const sev = m.vulnerability?.severity || 'Unknown';
+    const name = m.artifact?.name || '';
+    const id   = m.vulnerability?.id || '';
+    return (filter === 'All' || sev === filter) &&
+      (!search || name.toLowerCase().includes(search.toLowerCase()) || id.toLowerCase().includes(search.toLowerCase()));
+  });
+
+  return (
+    <div className="card">
+      <h2>🔍 Vulnerability Report Viewer</h2>
+      <div className="alert alert-info" style={{marginBottom:12}}>
+        Upload <code>vuln-report.json</code> downloaded from the pipeline artifacts.
+      </div>
+      <input type="file" accept=".json" onChange={loadFile} style={{marginBottom:10}} />
+      {error && <div className="alert alert-danger">{error}</div>}
+      {data && (
+        <>
+          <div style={{marginBottom:16}}>
+            <div style={{marginBottom:8,fontWeight:'bold',fontSize:'0.9rem',color:'var(--navy)'}}>
+              Severity Distribution ({matches.length} total findings)
+            </div>
+            {sevOrder.filter(s => sevCounts[s]).map(s => (
+              <div key={s} style={{marginBottom:6}}>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.82rem'}}>
+                  <span style={{fontWeight:'bold'}}>{s}</span>
+                  <span>{sevCounts[s] || 0}</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill"
+                    style={{width:`${((sevCounts[s]||0)/maxCount)*100}%`, background: sevColors[s]}} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="row" style={{marginBottom:12}}>
+            <div style={{flex:2}}>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search CVE or component..." />
+            </div>
+            <div style={{flex:1}}>
+              <select value={filter} onChange={e => setFilter(e.target.value)}>
+                <option value="All">All Severities</option>
+                {sevOrder.map(s => <option key={s} value={s}>{s} ({sevCounts[s]||0})</option>)}
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>CVE ID</th><th>Severity</th><th>Component</th><th>Version</th><th>Fixed In</th></tr></thead>
+            <tbody>
+              {filtered.map((m,i) => {
+                const v = m.vulnerability || {};
+                const a = m.artifact || {};
+                const cveId = v.id || '';
+                const nvdUrl = cveId.startsWith('CVE') ? `https://nvd.nist.gov/vuln/detail/${cveId}` : null;
+                return (
+                  <tr key={i}>
+                    <td>{nvdUrl ? <a href={nvdUrl} target="_blank">{cveId}</a> : cveId}</td>
+                    <td><SevBadge sev={v.severity || 'Unknown'} /></td>
+                    <td>{a.name || '—'}</td>
+                    <td>{a.version || '—'}</td>
+                    <td>{v.fix?.versions?.[0] || '—'}</td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 &&
+                <tr><td colSpan={5} style={{textAlign:'center',color:'var(--gray)'}}>
+                  {matches.length === 0 ? '✅ No vulnerabilities found!' : 'No matches for current filter.'}
+                </td></tr>}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── PKI Info ─────────────────────────────────────────────────────────────────
+function PKIInfo() {
+  return (
+    <div className="card">
+      <h2>🔐 PKI / Signing Info</h2>
+      <table>
+        <tbody>
+          <tr><td><strong>Algorithm</strong></td><td>RSA-4096 (CNSA 1.0)</td></tr>
+          <tr><td><strong>CA Certificate</strong></td><td>keys/ca/ca-root.crt (self-signed, 10yr)</td></tr>
+          <tr><td><strong>Signing Certificate</strong></td><td>keys/signing/sbom-signing.crt (1yr)</td></tr>
+          <tr><td><strong>Public Key</strong></td><td>keys/public/sbom-rsa-public.pem (committed to repo)</td></tr>
+          <tr><td><strong>Private Key</strong></td><td>GitLab CI variable SBOM_SIGNING_KEY (Protected, never committed)</td></tr>
+          <tr><td><strong>SBOM Format Signed</strong></td><td>CycloneDX XML (v1.4)</td></tr>
+          <tr><td><strong>Tool</strong></td><td>CycloneDX-CLI v0.30.0</td></tr>
+        </tbody>
+      </table>
+      <div className="alert alert-info" style={{marginTop:16}}>
+        To verify a signed SBOM locally:<br/>
+        <code>cyclonedx verify all sbom/holistic-sbom-signed.xml --key-file keys/public/sbom-rsa-public.pem</code>
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ─────────────────────────────────────────────────────────────────
+function App() {
+  const [config, setConfig]           = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('sbom_config') || '{}'); } catch { return {}; }
+  });
+  const [connected, setConnected]     = useState(false);
+  const [tab, setTab]                 = useState('pipelines');
+  const [refresh, setRefresh]         = useState(0);
+  const [selectedPipeline, setSelected] = useState(null);
+  const [pipelines, setPipelines]     = useState([]);
+  const [vulns, setVulns]             = useState([]);
+  const [error, setError]             = useState(null);
+
+  function saveConfig(cfg) {
+    sessionStorage.setItem('sbom_config', JSON.stringify(cfg));
+    setConfig(cfg);
+    setError(null);
+    testConnection(cfg);
+  }
+
+  async function testConnection(cfg) {
+    try {
+      const data = await api(cfg.token, cfg.projectId, '/pipelines?per_page=20');
+      setPipelines(data);
+      setConnected(true);
+    } catch(e) {
+      setError(`Connection failed: ${e}`);
+      setConnected(false);
+    }
+  }
+
+  useEffect(() => {
+    if (config.token && config.projectId) testConnection(config);
+  }, []);
+
+  const tabs = [
+    { id: 'pipelines',  label: '📋 Pipelines' },
+    { id: 'sbom',       label: '📦 SBOM Viewer' },
+    { id: 'vulns',      label: '🔍 Vulnerabilities' },
+    { id: 'pki',        label: '🔐 PKI Info' },
+  ];
+
+  return (
+    <>
+      <header>
+        <div>
+          <h1>SBOM Attestation Dashboard</h1>
+          <span>University Management System — Lockheed Martin Senior Design</span>
+        </div>
+        <div style={{textAlign:'right',fontSize:'0.82rem'}}>
+          {connected
+            ? <span style={{color:'#90ee90'}}>● Connected to {config.projectId}</span>
+            : <span style={{color:'#ffcc00'}}>○ Not connected</span>}
+        </div>
+      </header>
+
+      <div className="container">
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <ConfigPanel config={config} onSave={saveConfig} />
+
+        {connected && (
+          <>
+            <StatsRow pipelines={pipelines} vulns={vulns} />
+            <div className="tabs">
+              {tabs.map(t => (
+                <button key={t.id} className={`tab ${tab === t.id ? 'active' : ''}`}
+                  onClick={() => { setTab(t.id); setSelected(null); }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {tab === 'pipelines' && !selectedPipeline && (
+              <>
+                <TriggerPanel config={config} onTriggered={() => setRefresh(r => r+1)} />
+                <PipelineList config={config} refresh={refresh}
+                  onSelect={setSelected} />
+              </>
+            )}
+            {tab === 'pipelines' && selectedPipeline && (
+              <PipelineDetail config={config} pipeline={selectedPipeline}
+                onBack={() => setSelected(null)} />
+            )}
+            {tab === 'sbom'  && <SBOMViewer />}
+            {tab === 'vulns' && <VulnViewer />}
+            {tab === 'pki'   && <PKIInfo />}
+          </>
+        )}
+      </div>
+      <footer>SBOM Attestation Dashboard · Lockheed Martin Senior Design · bambelino85</footer>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
