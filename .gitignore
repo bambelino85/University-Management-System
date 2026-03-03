@@ -1,83 +1,25 @@
-# C++ compiled files
-*.o
-*.obj
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-university_system
-
-# Database files (optional - remove if you want to track them)
-data/*.dat
-data/*.txt
-
-# IDE specific files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Build directories
+# Build outputs
 build/
-bin/
-obj/
+university_app
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# Keys - NEVER commit private keys
+keys/ca/
+keys/signing/
+*.key
+*.pem
+!keys/public/*.pem
 
-# OS files
-.DS_Store
-Thumbs.db
+# Generated SBOM and reports (committed only when signed)
+sbom/*.json
+reports/*.json
+reports/*.html
 
 # Python
 __pycache__/
-*.py[cod]
-*.class
-*.so
-.Python
-venv/
-ENV/
+*.pyc
+.env
 
-# --- allow app data files in repo ---
-!data/**
-!*.dat
-!*.txt
-!*.json
-!*.csv
-
-# Compiled binary
-university_app
-
-# Build artifacts
-*.o
-*.out
-
-# SBOM outputs (optional)
-sbom-*.json
-
-PushMe1!
-PushMe1!.pub
-*.key
-*.pem
+# IDE
+.vscode/
+.idea/
+*.swp

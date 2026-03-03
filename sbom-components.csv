@@ -1,0 +1,7 @@
+name,version,type,supplier,license,depends_on,description
+ums-main,1.0.0,application,bambelino85,MIT,ums-database,Main entry point and menu system
+ums-database,1.0.0,library,bambelino85,MIT,ums-student|ums-faculty|ums-course,DatabaseManager class and file I/O
+ums-student,1.0.0,library,bambelino85,MIT,ums-person,Student UndergraduateStudent GraduateStudent HonorsStudent classes
+ums-faculty,1.0.0,library,bambelino85,MIT,ums-person,Faculty Professor Staff Administrator classes
+ums-course,1.0.0,library,bambelino85,MIT,ums-person,Course Department Major Enrollment Grade Appointment classes
+ums-person,1.0.0,library,bambelino85,MIT,,Base Person class
