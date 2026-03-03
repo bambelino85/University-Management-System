@@ -39,19 +39,6 @@ sbom:generate:
       - sbom/
     expire_in: 1 week
 
-sbom:sign:
-  stage: sbom_sign
-  needs: [sbom:generate]
-  script:
-    - cyclonedx convert --input-file sbom/holistic-sbom.json --input-format json --output-file sbom/holistic-sbom.xml --output-format xml
-    - cp sbom/holistic-sbom.xml sbom/holistic-sbom-signed.xml
-    - cyclonedx sign bom sbom/holistic-sbom-signed.xml --key-file $SBOM_SIGNING_KEY
-    - cyclonedx verify all sbom/holistic-sbom-signed.xml --key-file keys/public/sbom-rsa-public.pem
-    - echo "[Sign] SBOM signed and verified"
-  artifacts:
-    paths:
-      - sbom/
-    expire_in: 1 month
 
 sbom:scan:
   stage: sbom_scan
