@@ -108,3 +108,16 @@ pages:
       - public
   only:
     - main
+
+pages:
+  stage: report
+  needs: []
+  script:
+    - mkdir -p public
+    - cp sbom_ui/index.html public/index.html
+    - echo "SBOM UI deployed to GitLab Pages"
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
